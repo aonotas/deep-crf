@@ -5,9 +5,11 @@ DeepCRF is a sequene labeling library that uses neural networks and CRFs in Pyth
 
 ## Features
 DeepCRF provides following features.
-- Bi-LSTM 
+- Bi-LSTM / Bi-GRU / Bi-RNN
 - CNN for character-level representation
-- CRFs
+- Pre-trained word embedding
+- Pre-trained character embedding
+- CRFs at output layer
 - CoNLL format input/output
 - Raw text data input/output
 - Training : Your variable files
