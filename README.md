@@ -17,6 +17,6 @@ DeepCRF provides following features.
 - Evaluation : F-measure, Accuracy
 
 ## Plan 
-- First release : 2017-04-21
+- First release : 2017-05-12
 
 
