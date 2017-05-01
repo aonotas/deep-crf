@@ -109,5 +109,6 @@ class BiLSTM(chainer.Chain):
         # Label Predict
         output = self.output_layer(h_vecs)
         output_list = F.split_axis(output, np.cumsum(n_length[:-1]), axis=0)
-
+        print 'output:', output.shape
+        print [_.shape[0] for _ in output_list], sum([_.shape[0] for _ in output_list])
         return output_list
