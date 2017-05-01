@@ -78,7 +78,7 @@ class BiLSTM(chainer.Chain):
         for pred, gold in zip(predicts, ts_sorted):
             pred = to_cpu(pred.data)
             gold = to_cpu(gold)
-            print pred, gold
+            # print pred, gold
             gold_predict_pairs.append([gold, pred])
 
         return gold_predict_pairs, loss
