@@ -64,11 +64,12 @@ class BiLSTM(chainer.Chain):
 
         predict_list = []
         cnt = 0
-        for n_len in n_length:
+        for n_len in self.n_length:
             pred = F.concat(y_list[cnt:cnt + n_len], axis=0)
             predict_list.append(pred)
             cnt += n_len
 
+        inds = self.inds
         inds_trans = [inds[i] for i in inds]
         hs = [predict_list[i] for i in inds]
         ts_original = [self.xp.array(t[i], self.xp.int32) for i in inds]
@@ -102,7 +103,8 @@ class BiLSTM(chainer.Chain):
     def __call__(self, x_data, add_pos=None, add_h=None):
         hx = None
         cx = None
-        n_length = [len(_x) for _x in x_data]
+        self.n_length = [len(_x) for _x in x_data]
+        self.inds = np.argsort([-len(_x) for _x in x_data]).astype('i')
 
         xs = []
         for i, x in enumerate(x_data):
