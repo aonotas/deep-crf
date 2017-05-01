@@ -60,18 +60,34 @@ class BiLSTM(chainer.Chain):
     def set_train(self, train):
         self.train = train
 
-    def predict(self, output_list, ts):
-        inds = np.argsort([-len(_x) for _x in ts]).astype('i')
+    def predict(self, y_list, ts):
+
+        predict_list = []
+        cnt = 0
+        for n_len in n_length:
+            pred = F.concat(y_list[cnt:cnt + n_len], axis=0)
+            predict_list.append(pred)
+            cnt += n_len
+
         inds_trans = [inds[i] for i in inds]
-        hs_sorted = [output_list[i] for i in inds]
-        ts_sorted = [ts[i] for i in inds]
+        hs = [predict_list[i] for i in inds]
+        ts_original = [self.xp.array(t[i], self.xp.int32) for i in inds]
 
-        hs_trans = F.transpose_sequence(hs_sorted)
-        ts_trans = F.transpose_sequence(ts_sorted)
-
-        _, predicts_trans = self.lossfun.argmax(hs_trans)
-
-        loss = self.lossfun(hs_trans, ts_trans)
+        hs = F.transpose_sequence(hs)
+        ts = F.transpose_sequence(ts_original)
+        loss = self.lossfun(hs, ts)
+        #
+        # inds = np.argsort([-len(_x) for _x in ts]).astype('i')
+        # inds_trans = [inds[i] for i in inds]
+        # hs_sorted = [output_list[i] for i in inds]
+        # ts_sorted = [ts[i] for i in inds]
+        #
+        # hs_trans = F.transpose_sequence(hs_sorted)
+        # ts_trans = F.transpose_sequence(ts_sorted)
+        #
+        # _, predicts_trans = self.lossfun.argmax(hs_trans)
+        #
+        # loss = self.lossfun(hs_trans, ts_trans)
 
         predicts = F.transpose_sequence(predicts_trans)
         gold_predict_pairs = []
@@ -108,7 +124,8 @@ class BiLSTM(chainer.Chain):
 
         # Label Predict
         output = self.output_layer(h_vecs)
-        output_list = F.split_axis(output, np.cumsum(n_length[:-1]), axis=0)
-        print 'output:', output.shape
-        print [_.shape[0] for _ in output_list], sum([_.shape[0] for _ in output_list])
+        output_list = F.split_axis(output, output.data.shape[0], axis=0)
+        # output_list = F.split_axis(output, np.cumsum(n_length[:-1]), axis=0)
+        # print 'output:', output.shape
+        # print [_.shape[0] for _ in output_list], sum([_.shape[0] for _ in output_list])
         return output_list
