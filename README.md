@@ -1,3 +1,5 @@
+<p align="center"><img src="https://github.com/aonotas/deep-crf/blob/master/deep-crf.png" width="150"></p>
+
 # DeepCRF: Neural Networks and CRFs for Sequence Labeling
 A implementation of Conditional Random Fields (CRFs) with Deep Learning Method.
 
