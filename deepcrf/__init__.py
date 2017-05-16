@@ -12,6 +12,10 @@ def cli():
 
 @cli.command()
 @click.argument('train_file', type=click.Path(exists=True))
+@click.option('--save_dir', type=str, default='save_model_dir',
+              help='trained model save dir')
+@click.option('--model_name', type=str, default='bilstm-cnn-crf',
+              help="select from [bilstm-cnn-crf, bilstm-cnn]")
 @click.option('--batchsize', type=int, default=32)
 @click.option('--max_iter', type=int, default=100)
 @click.option('--optimizer', type=str, default='adam',
@@ -36,7 +40,8 @@ def cli():
 @click.option('--test_file', type=click.Path())
 @click.option('--delimiter', type=str, default='\t',
               help='delimiter string')
+@click.option('--save_name', type=str, default='',
+              help='save_name')
 def train(train_file, **args):
     # load input_file
-    print args
     main.train(train_file, **args)

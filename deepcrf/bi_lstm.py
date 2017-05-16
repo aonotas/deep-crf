@@ -20,7 +20,6 @@ from util import PADDING, UNKWORD
 
 import six
 
-
 to_cpu = chainer.cuda.to_cpu
 
 
@@ -28,15 +27,27 @@ class BiLSTM(chainer.Chain):
 
     def __init__(self, n_vocab=None, emb_dim=100, hidden_dim=200,
                  init_emb=None, use_dropout=0.33, n_layers=1,
-                 n_label=0, use_crf=True, use_bi=True):
+                 n_label=0, use_crf=True, use_bi=True, rnn_name='bilstm'):
         # feature_dim = emb_dim + add_dim + pos_dim
         n_dir = 2 if use_bi else 1
         feature_dim = emb_dim
+
+        rnn_names = ['bilstm', 'lstm', 'bigru', 'gru', 'birnn', 'rnn']
+        rnn_links = [L.NStepBiLSTM, L.NStepLSTM]
+        #  rnn_links = [L.NStepBiLSTM, L.NStepLSTM, L.NStepBiGRU, L.NStepGRU,
+        #               L.NStepBiRNN, L.NStepRNN]
+        if rnn_name not in rnn_names:
+            candidate = ','.join(rnn_list)
+            raise ValueError('Invalid RNN name: "%s". Please select from [%s]'
+                             % (rnn_name, candidate))
+
+        rnn_link = rnn_links[rnn_names.index(rnn_name)]
+
         super(BiLSTM, self).__init__(
             word_embed=L.EmbedID(n_vocab, emb_dim, ignore_label=-1),
-            bi_lstm=L.NStepBiLSTM(n_layers=n_layers, in_size=feature_dim,
-                                  out_size=hidden_dim, dropout=use_dropout,
-                                  use_cudnn=True),
+            rnn=rnn_link(n_layers=n_layers, in_size=feature_dim,
+                         out_size=hidden_dim, dropout=use_dropout,
+                         use_cudnn=True),
             output_layer=L.Linear(hidden_dim * n_dir, n_label),
         )
         # if n_pos:
@@ -54,7 +65,7 @@ class BiLSTM(chainer.Chain):
 
         # Forget gate bias => 1.0
         # MEMO: Values 1 and 5 reference the forget gate.
-        for w in self.bi_lstm:
+        for w in self.rnn:
             w.b1.data[:] = 1.0
             w.b5.data[:] = 1.0
 
@@ -114,8 +125,8 @@ class BiLSTM(chainer.Chain):
             x = F.dropout(x, ratio=self.use_dropout, train=self.train)
             xs.append(x)
 
-        _hy_f, _cy_f, h_vecs = self.bi_lstm(hx=hx, cx=cx, xs=xs,
-                                            train=self.train)
+        _hy_f, _cy_f, h_vecs = self.rnn(hx=hx, cx=cx, xs=xs,
+                                        train=self.train)
 
         h_vecs = F.concat(h_vecs, axis=0)
         if self.use_dropout:
@@ -125,7 +136,5 @@ class BiLSTM(chainer.Chain):
         # Label Predict
         output = self.output_layer(h_vecs)
         output_list = F.split_axis(output, output.data.shape[0], axis=0)
-        # output_list = F.split_axis(output, np.cumsum(n_length[:-1]), axis=0)
-        # print 'output:', output.shape
-        # print [_.shape[0] for _ in output_list], sum([_.shape[0] for _ in output_list])
+
         return output_list
