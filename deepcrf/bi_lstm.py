@@ -70,7 +70,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
         #     self.add_link('pos_embed', pos_embed)
 
         if use_crf:
-            self.lossfun = L.CRF1d(n_label=n_label)
+            self.add_link('lossfun', L.CRF1d(n_label=n_label))
 
         # self.n_pos = n_pos
         self.hidden_dim = hidden_dim
