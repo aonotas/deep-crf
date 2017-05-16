@@ -279,7 +279,6 @@ def run(data_file, is_train=False, **args):
         logging.info(' [train]')
         logging.info('  loss     :' + str(sum_loss))
         logging.info('  accuracy :' + str(train_accuracy))
-        logging.info('  alpha    :' + str(opt.alpha))
 
         # Dev
         predict_dev, loss_dev = eval_loop(x_dev, x_char_dev, y_dev)
