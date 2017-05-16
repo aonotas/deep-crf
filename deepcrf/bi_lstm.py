@@ -28,15 +28,16 @@ class BiLSTM(chainer.Chain):
 
     def __init__(self, n_vocab=None, emb_dim=100, hidden_dim=200,
                  init_emb=None, use_dropout=0.33, n_layers=1,
-                 n_label=0, use_crf=True):
+                 n_label=0, use_crf=True, use_bi=True):
         # feature_dim = emb_dim + add_dim + pos_dim
+        n_dir = 2 if use_bi else 1
         feature_dim = emb_dim
         super(BiLSTM, self).__init__(
             word_embed=L.EmbedID(n_vocab, emb_dim, ignore_label=-1),
             bi_lstm=L.NStepBiLSTM(n_layers=n_layers, in_size=feature_dim,
                                   out_size=hidden_dim, dropout=use_dropout,
                                   use_cudnn=True),
-            output_layer=L.Linear(hidden_dim * 2, n_label),
+            output_layer=L.Linear(hidden_dim * n_dir, n_label),
         )
         # if n_pos:
         #     pos_embed = L.EmbedID(n_pos, pos_dim, ignore_label=-1)
@@ -60,7 +61,7 @@ class BiLSTM(chainer.Chain):
     def set_train(self, train):
         self.train = train
 
-    def predict(self, y_list, ts):
+    def predict(self, y_list, t, compute_loss=True):
 
         predict_list = []
         cnt = 0
@@ -71,32 +72,29 @@ class BiLSTM(chainer.Chain):
 
         inds = self.inds
         inds_trans = [inds[i] for i in inds]
+
         hs = [predict_list[i] for i in inds]
         ts_original = [self.xp.array(t[i], self.xp.int32) for i in inds]
 
         hs = F.transpose_sequence(hs)
-        ts = F.transpose_sequence(ts_original)
-        loss = self.lossfun(hs, ts)
-        #
-        # inds = np.argsort([-len(_x) for _x in ts]).astype('i')
-        # inds_trans = [inds[i] for i in inds]
-        # hs_sorted = [output_list[i] for i in inds]
-        # ts_sorted = [ts[i] for i in inds]
-        #
-        # hs_trans = F.transpose_sequence(hs_sorted)
-        # ts_trans = F.transpose_sequence(ts_sorted)
-        #
-        # _, predicts_trans = self.lossfun.argmax(hs_trans)
-        #
-        # loss = self.lossfun(hs_trans, ts_trans)
+
+        loss = None
+        if compute_loss:
+            # loss
+            ts = F.transpose_sequence(ts_original)
+            loss = self.lossfun(hs, ts)
+
+        # predict
+        _, predicts_trans = self.lossfun.argmax(hs)
 
         predicts = F.transpose_sequence(predicts_trans)
         gold_predict_pairs = []
-        for pred, gold in zip(predicts, ts_sorted):
+        for pred, gold in zip(predicts, ts_original):
             pred = to_cpu(pred.data)
             gold = to_cpu(gold)
-            # print pred, gold
             gold_predict_pairs.append([gold, pred])
+
+        self.y = gold_predict_pairs
 
         return gold_predict_pairs, loss
 

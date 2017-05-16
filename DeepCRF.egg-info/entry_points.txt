@@ -1,0 +1,4 @@
+
+        [console_scripts]
+        deep-crf=deepcrf:cli
+    

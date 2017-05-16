@@ -34,6 +34,8 @@ def cli():
 @click.option('--word_emb_file', type=click.Path())
 @click.option('--dev_file', type=click.Path())
 @click.option('--test_file', type=click.Path())
+@click.option('--delimiter', type=str, default='\t',
+              help='delimiter string')
 def train(train_file, **args):
     # load input_file
     print args

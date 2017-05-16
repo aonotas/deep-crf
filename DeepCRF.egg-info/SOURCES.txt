@@ -1,0 +1,10 @@
+DeepCRF.egg-info/PKG-INFO
+DeepCRF.egg-info/SOURCES.txt
+DeepCRF.egg-info/dependency_links.txt
+DeepCRF.egg-info/entry_points.txt
+DeepCRF.egg-info/requires.txt
+DeepCRF.egg-info/top_level.txt
+deepcrf/__init__.py
+deepcrf/bi_lstm.py
+deepcrf/main.py
+deepcrf/util.py

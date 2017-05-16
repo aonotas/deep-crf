@@ -46,7 +46,7 @@ def build_tag_vocab(dataset, tag_idx=-1):
     return vocab
 
 
-def read_conll_file(filename, delimiter=u'\t'):
+def read_conll_file(filename, delimiter=u'\t', input_idx=0, output_idx=-1):
     sentence = []
     sentences = []
     n_features = -1
@@ -62,8 +62,10 @@ def read_conll_file(filename, delimiter=u'\t'):
                 n_features = len(l_split)
 
             if n_features != len(l_split):
-                raise ValueError('Invalid input feature sizes: "%s". Please check at line [%s]'
-                                 % (str(len(l_split)), str(len(line_idx))))
+                val = (str(len(l_split)), str(len(line_idx)))
+                err_msg = 'Invalid input feature sizes: "%s". \
+                Please check at line [%s]' % val
+                raise ValueError(err_msg)
             sentence.append(l_split)
     if len(sentence) > 0:
         sentences.append(sentence)

@@ -36,7 +36,15 @@ def train(train_file, **args):
     # load files
     dev_file = args['dev_file']
     test_file = args['test_file']
-    sentences_train = util.read_conll_file(train_file, delimiter=u' ')
+    delimiter = args['delimiter']
+    sentences_train = util.read_conll_file(filename=train_file,
+                                           delimiter=delimiter,
+                                           input_idx=0, output_idx=-1)
+    if len(sentences_train) == 0:
+        s = str(len(sentences_train))
+        err_msg = 'Invalid training sizes: {} sentences. '.format(s)
+        raise ValueError(err_msg)
+
     sentences_dev = []
     sentences_test = []
     if dev_file:

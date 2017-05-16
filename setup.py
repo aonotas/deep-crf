@@ -11,6 +11,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        deepcrf=deepcrf:cli
+        deep-crf=deepcrf:cli
     '''
 )
