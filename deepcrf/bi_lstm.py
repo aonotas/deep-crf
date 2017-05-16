@@ -15,6 +15,7 @@ import chainer.links as L
 import math
 from chainer import initializers
 
+from cnn import CharCNNEncoder
 import util
 from util import PADDING, UNKWORD
 
@@ -25,17 +26,22 @@ to_cpu = chainer.cuda.to_cpu
 
 class BiLSTM(chainer.Chain):
 
-    def __init__(self, n_vocab=None, emb_dim=100, hidden_dim=200,
-                 init_emb=None, use_dropout=0.33, n_layers=1,
-                 n_label=0, use_crf=True, use_bi=True, rnn_name='bilstm'):
+    def __init__(self, n_vocab=None, n_char_vocab=None, emb_dim=100,
+                 hidden_dim=200, init_emb=None, use_dropout=0.33, n_layers=1,
+                 n_label=0, use_crf=True, use_bi=True, char_input_dim=100,
+                 char_hidden_dim=100, rnn_name='bilstm'):
         # feature_dim = emb_dim + add_dim + pos_dim
         n_dir = 2 if use_bi else 1
         feature_dim = emb_dim
 
+        use_char = False
+        if n_char_vocab is not None:
+            use_char = True
+            feature_dim += char_hidden_dim
+
         rnn_names = ['bilstm', 'lstm', 'bigru', 'gru', 'birnn', 'rnn']
-        rnn_links = [L.NStepBiLSTM, L.NStepLSTM]
-        #  rnn_links = [L.NStepBiLSTM, L.NStepLSTM, L.NStepBiGRU, L.NStepGRU,
-        #               L.NStepBiRNN, L.NStepRNN]
+        rnn_links = [L.NStepBiLSTM, L.NStepLSTM, L.NStepBiGRU, L.NStepGRU,
+                     L.NStepBiRNNTanh, L.NStepRNNTanh]
         if rnn_name not in rnn_names:
             candidate = ','.join(rnn_list)
             raise ValueError('Invalid RNN name: "%s". Please select from [%s]'
@@ -50,6 +56,15 @@ class BiLSTM(chainer.Chain):
                          use_cudnn=True),
             output_layer=L.Linear(hidden_dim * n_dir, n_label),
         )
+
+        if use_char:
+
+            char_cnn = CharCNNEncoder(emb_dim=char_input_dim, window_size=3,
+                                      hidden_dim=char_hidden_dim,
+                                      vocab_size=n_char_vocab, init_emb=None,
+                                      PAD_IDX=0)
+            self.add_link('char_cnn', char_cnn)
+
         # if n_pos:
         #     pos_embed = L.EmbedID(n_pos, pos_dim, ignore_label=-1)
         #     self.add_link('pos_embed', pos_embed)
@@ -62,6 +77,7 @@ class BiLSTM(chainer.Chain):
         self.train = True
         self.use_dropout = use_dropout
         self.n_layers = n_layers
+        self.use_char = use_char
 
         # Forget gate bias => 1.0
         # MEMO: Values 1 and 5 reference the forget gate.
@@ -71,6 +87,9 @@ class BiLSTM(chainer.Chain):
 
     def set_train(self, train):
         self.train = train
+
+        if self.use_char:
+            self.char_cnn.set_train(train)
 
     def predict(self, y_list, t, compute_loss=True):
 
@@ -109,19 +128,29 @@ class BiLSTM(chainer.Chain):
 
         return gold_predict_pairs, loss
 
-    def __call__(self, x_data, add_pos=None, add_h=None):
+    def __call__(self, x_data, x_char_data=None, add_x=None):
         hx = None
         cx = None
         self.n_length = [len(_x) for _x in x_data]
         self.inds = np.argsort([-len(_x) for _x in x_data]).astype('i')
 
+        if self.use_char:
+            # CharCNN
+            x_char_data_flat = []
+            for _ in x_char_data:
+                x_char_data_flat.extend(_)
+            char_vecs = self.char_cnn(x_char_data_flat)
+            char_index = self.char_cnn.char_index(self.n_length)
+
         xs = []
         for i, x in enumerate(x_data):
             x = Variable(x, volatile=not self.train)
             x = self.word_embed(x)
-            # if self.n_pos:
-            #     pos_vec = self.pos_embed(add_pos[i])
-            #     x = F.concat([x, pos_vec], axis=1)
+
+            if self.use_char:
+                x_char = F.embed_id(char_index[i], char_vecs, ignore_label=-1)
+                x = F.concat([x, x_char], axis=1)
+
             x = F.dropout(x, ratio=self.use_dropout, train=self.train)
             xs.append(x)
 

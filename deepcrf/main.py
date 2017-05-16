@@ -81,6 +81,7 @@ def train(train_file, **args):
     # TODO: compute unk words
     sentences_words_train = [w_obj[0] for w_obj in sentences_train]
     vocab = util.build_vocab(sentences_words_train)
+    vocab_char = util.build_vocab(util.flatten(sentences_words_train))
     vocab_tags = util.build_tag_vocab(sentences_train)
 
     PAD_IDX = vocab[PADDING]
@@ -92,6 +93,13 @@ def train(train_file, **args):
                   for sentence in sentences]
         return x_data
 
+    def parse_to_char_ids(sentences):
+        x_data = [[xp.array([vocab_char.get(c, UNK_IDX) for c in w[0]],
+                            dtype=xp.int32)
+                   for w in sentence]
+                  for sentence in sentences]
+        return x_data
+
     def parse_to_tag_ids(sentences):
         x_data = [xp.array([vocab_tags.get(w[-1], -1)
                             for w in sentence], dtype=xp.int32)
@@ -99,12 +107,15 @@ def train(train_file, **args):
         return x_data
 
     x_train = parse_to_word_ids(sentences_train)
+    x_char_train = parse_to_char_ids(sentences_train)
     y_train = parse_to_tag_ids(sentences_train)
 
     x_dev = parse_to_word_ids(sentences_dev)
+    x_char_dev = parse_to_char_ids(sentences_dev)
     y_dev = parse_to_tag_ids(sentences_dev)
 
     x_test = parse_to_word_ids(sentences_test)
+    x_char_test = parse_to_char_ids(sentences_test)
     y_test = parse_to_tag_ids(sentences_test)
 
     cnt_train_unk = sum([xp.sum(d == UNK_IDX) for d in x_train])
@@ -139,16 +150,20 @@ def train(train_file, **args):
 
     # save vocab
     save_vocab = save_name + '.vocab'
+    save_vocab_char = save_name + '.vocab_char'
     save_tags_vocab = save_name + '.vocab_tag'
     save_train_config = save_name + '.train_config'
     logging.info('save_vocab        :' + save_vocab)
+    logging.info('save_vocab_char   :' + save_vocab_char)
     logging.info('save_tags_vocab   :' + save_tags_vocab)
     logging.info('save_train_config :' + save_train_config)
     util.write_vocab(save_vocab, vocab)
+    util.write_vocab(save_vocab_char, vocab_char)
     util.write_vocab(save_tags_vocab, vocab_tags)
     util.write_vocab(save_train_config, args)
 
-    net = BiLSTM(n_vocab=len(vocab), emb_dim=args['n_word_emb'],
+    net = BiLSTM(n_vocab=len(vocab), n_char_vocab=len(vocab_char),
+                 emb_dim=args['n_word_emb'],
                  hidden_dim=args['n_hidden'],
                  n_layers=args['n_layer'], init_emb=None,
                  n_label=len(vocab_tags))
@@ -186,11 +201,11 @@ def train(train_file, **args):
         sum_loss = 0.0
         predict_train = []
         for i_index, index in enumerate(iteration_list):
-            data = [(x_train[i], y_train[i])
+            data = [(x_train[i], x_char_train[i], y_train[i])
                     for i in perm[index:index + batchsize]]
-            x, target_y = zip(*data)
+            x, x_char, target_y = zip(*data)
 
-            output = net(x_data=x)
+            output = net(x_data=x, x_char_data=x_char)
             predict, loss = net.predict(output, target_y)
 
             # loss
@@ -212,7 +227,7 @@ def train(train_file, **args):
         logging.info('  accuracy :' + str(train_accuracy))
         logging.info('  alpha    :' + str(opt.alpha))
 
-        def eval_loop(x_data, y_data):
+        def eval_loop(x_data, x_char_data, y_data):
             # dev
             net.set_train(train=False)
             iteration_list = range(0, len(x_data), batchsize)
@@ -220,18 +235,18 @@ def train(train_file, **args):
             sum_loss = 0.0
             predict_lists = []
             for i_index, index in enumerate(iteration_list):
-                data = [(x_data[i], y_data[i])
+                data = [(x_data[i], x_char_data[i], y_data[i])
                         for i in perm[index:index + batchsize]]
-                x, target_y = zip(*data)
+                x, x_char, target_y = zip(*data)
 
-                output = net(x_data=x)
+                output = net(x_data=x, x_char_data=x_char)
                 predict, loss = net.predict(output, target_y)
 
                 sum_loss += loss.data
                 predict_lists.extend(predict)
             return predict_lists, sum_loss
 
-        predict_dev, loss_dev = eval_loop(x_dev, y_dev)
+        predict_dev, loss_dev = eval_loop(x_dev, x_char_dev, y_dev)
 
         # Evaluation
         dev_accuracy = util.eval_accuracy(predict_dev)
