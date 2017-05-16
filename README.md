@@ -7,17 +7,21 @@ DeepCRF is a sequene labeling library that uses neural networks and CRFs in Pyth
 
 ## How to install?
 ```
-pip install deep-crf # (it will work in the future)
+git clone https://github.com/aonotas/deep-crf
+python setup.py install
 ```
 
-## How to run?
+## How to train?
 ```
-wget http://deep-crf.com/trained_model/NER_trained_BiLSTM-CNN-CRF.model
-# install deep-crf
-pip install deep-crf
-# run deep-crf
-deep-crf --model ./NER_trained_BiLSTM-CNN-CRF.model --input input_raw_text.txt --output output_ner.txt
+deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf
 ```
+
+
+## How to predict?
+```
+deep-crf predict input_raw_file.txt --model_name bilstm-cnn-crf --model_filename bilstm-cnn-crf_adam.model
+```
+
 
 ## Features
 DeepCRF provides following features.
@@ -31,8 +35,4 @@ DeepCRF provides following features.
 - Training : Your variable files
 - Test : Raw text file at command-line
 - Evaluation : F-measure, Accuracy
-
-## Plan 
-- First release : 2017-05-12
-
 
