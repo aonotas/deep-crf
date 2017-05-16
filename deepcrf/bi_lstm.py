@@ -20,7 +20,7 @@ import util
 from util import PADDING, UNKWORD
 
 import six
-import crf
+
 to_cpu = chainer.cuda.to_cpu
 
 
@@ -70,7 +70,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
         #     self.add_link('pos_embed', pos_embed)
 
         if use_crf:
-            self.lossfun = crf.CRF1d(n_label=n_label)
+            self.lossfun = L.CRF1d(n_label=n_label)
 
         # self.n_pos = n_pos
         self.hidden_dim = hidden_dim
