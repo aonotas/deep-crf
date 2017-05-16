@@ -10,9 +10,10 @@ np.random.seed(1234)
 import chainer
 from chainer import cuda
 from chainer import optimizers
+from chainer import serializers
 import chainer.functions as F
 
-from bi_lstm import BiLSTM
+from bi_lstm import BiLSTM_CNN_CRF
 
 import util
 from util import PADDING, UNKWORD
@@ -25,7 +26,8 @@ to_cpu = chainer.cuda.to_cpu
 import os.path
 
 
-def train(train_file, **args):
+def run(data_file, is_train=False, **args):
+    is_test = not is_train
     batchsize = args['batchsize']
     model_name = args['model_name']
     optimizer_name = args['optimizer']
@@ -58,13 +60,19 @@ def train(train_file, **args):
     dev_file = args['dev_file']
     test_file = args['test_file']
     delimiter = args['delimiter']
-    sentences_train = util.read_conll_file(filename=train_file,
-                                           delimiter=delimiter,
-                                           input_idx=0, output_idx=-1)
-    if len(sentences_train) == 0:
-        s = str(len(sentences_train))
-        err_msg = 'Invalid training sizes: {} sentences. '.format(s)
-        raise ValueError(err_msg)
+    sentences_train = []
+    if is_train:
+        sentences_train = util.read_conll_file(filename=data_file,
+                                               delimiter=delimiter,
+                                               input_idx=0, output_idx=-1)
+        if len(sentences_train) == 0:
+            s = str(len(sentences_train))
+            err_msg = 'Invalid training sizes: {} sentences. '.format(s)
+            raise ValueError(err_msg)
+    else:
+        # Predict
+        sentences_train = util.read_raw_file(filename=data_file,
+                                             delimiter=u' ')
 
     sentences_train = sentences_train[:100]
 
@@ -77,38 +85,50 @@ def train(train_file, **args):
         sentences_test = util.read_conll_file(test_file, delimiter=delimiter,
                                               input_idx=0, output_idx=-1)
 
+    save_vocab = save_name + '.vocab'
+    save_vocab_char = save_name + '.vocab_char'
+    save_tags_vocab = save_name + '.vocab_tag'
+    save_train_config = save_name + '.train_config'
+
     # TODO: check unkown pos tags
     # TODO: compute unk words
-    sentences_words_train = [w_obj[0] for w_obj in sentences_train]
-    vocab = util.build_vocab(sentences_words_train)
-    vocab_char = util.build_vocab(util.flatten(sentences_words_train))
-    vocab_tags = util.build_tag_vocab(sentences_train)
+    if is_train:
+        sentences_words_train = [w_obj[0] for w_obj in sentences_train]
+        vocab = util.build_vocab(sentences_words_train)
+        vocab_char = util.build_vocab(util.flatten(sentences_words_train))
+        vocab_tags = util.build_tag_vocab(sentences_train)
+    elif is_test:
+        vocab = util.load_vocab(save_vocab)
+        vocab_char = util.load_vocab(save_vocab_char)
+        vocab_tags = util.load_vocab(save_tags_vocab)
 
     PAD_IDX = vocab[PADDING]
     UNK_IDX = vocab[UNKWORD]
 
+    CHAR_PAD_IDX = vocab_char[PADDING]
+    CHAR_UNK_IDX = vocab_char[UNKWORD]
+
     def parse_to_word_ids(sentences):
-        x_data = [xp.array([vocab.get(w[0].lower(), UNK_IDX)
-                            for w in sentence], dtype=xp.int32)
-                  for sentence in sentences]
-        return x_data
+        return util.parse_to_word_ids(sentences, xp=xp, vocab=vocab,
+                                      UNK_IDX=UNK_IDX, idx=0)
 
     def parse_to_char_ids(sentences):
-        x_data = [[xp.array([vocab_char.get(c, UNK_IDX) for c in w[0]],
-                            dtype=xp.int32)
-                   for w in sentence]
-                  for sentence in sentences]
-        return x_data
+        return util.parse_to_char_ids(sentences, xp=xp, vocab_char=vocab_char,
+                                      UNK_IDX=CHAR_UNK_IDX, idx=0)
 
     def parse_to_tag_ids(sentences):
-        x_data = [xp.array([vocab_tags.get(w[-1], -1)
-                            for w in sentence], dtype=xp.int32)
-                  for sentence in sentences]
-        return x_data
+        return util.parse_to_tag_ids(sentences, xp=xp, vocab=vocab_tags,
+                                     UNK_IDX=-1, idx=-1)
 
+    # if is_train:
     x_train = parse_to_word_ids(sentences_train)
     x_char_train = parse_to_char_ids(sentences_train)
     y_train = parse_to_tag_ids(sentences_train)
+
+    # elif is_test:
+    #     x_predict = parse_to_word_ids(sentences_predict)
+    #     x_char_predict = parse_to_char_ids(sentences_predict)
+    #     y_predict = parse_to_tag_ids(sentences_predict)
 
     x_dev = parse_to_word_ids(sentences_dev)
     x_char_dev = parse_to_char_ids(sentences_dev)
@@ -149,10 +169,6 @@ def train(train_file, **args):
     logging.info('save_dir :' + str(save_dir))
 
     # save vocab
-    save_vocab = save_name + '.vocab'
-    save_vocab_char = save_name + '.vocab_char'
-    save_tags_vocab = save_name + '.vocab_tag'
-    save_train_config = save_name + '.train_config'
     logging.info('save_vocab        :' + save_vocab)
     logging.info('save_vocab_char   :' + save_vocab_char)
     logging.info('save_tags_vocab   :' + save_tags_vocab)
@@ -162,11 +178,11 @@ def train(train_file, **args):
     util.write_vocab(save_tags_vocab, vocab_tags)
     util.write_vocab(save_train_config, args)
 
-    net = BiLSTM(n_vocab=len(vocab), n_char_vocab=len(vocab_char),
-                 emb_dim=args['n_word_emb'],
-                 hidden_dim=args['n_hidden'],
-                 n_layers=args['n_layer'], init_emb=None,
-                 n_label=len(vocab_tags))
+    net = BiLSTM_CNN_CRF(n_vocab=len(vocab), n_char_vocab=len(vocab_char),
+                         emb_dim=args['n_word_emb'],
+                         hidden_dim=args['n_hidden'],
+                         n_layers=args['n_layer'], init_emb=None,
+                         n_label=len(vocab_tags))
 
     if args['word_emb_file']:
         # set Pre-trained embeddings
@@ -190,6 +206,44 @@ def train(train_file, **args):
 
     opt.setup(net)
     opt.add_hook(chainer.optimizer.GradientClipping(5.0))
+
+    def eval_loop(x_data, x_char_data, y_data):
+        # dev or test
+        net.set_train(train=False)
+        iteration_list = range(0, len(x_data), batchsize)
+        perm = np.random.permutation(len(x_data))
+        sum_loss = 0.0
+        predict_lists = []
+        for i_index, index in enumerate(iteration_list):
+            data = [(x_data[i], x_char_data[i], y_data[i])
+                    for i in perm[index:index + batchsize]]
+            x, x_char, target_y = zip(*data)
+
+            output = net(x_data=x, x_char_data=x_char)
+            predict, loss = net.predict(output, target_y)
+
+            sum_loss += loss.data
+            predict_lists.extend(predict)
+        return predict_lists, sum_loss
+
+    if is_test:
+        # predict
+        model_filename = args['model_filename']
+        model_filename = save_dir + model_filename
+        serializers.load_hdf5(model_filename, net)
+
+        vocab_tags_inv = dict([(v, k) for k, v in vocab_tags.items()])
+        x_predict = x_train
+        x_char_predict = x_char_train
+        y_predict = y_train
+        predict_pairs, _ = eval_loop(x_predict, x_char_predict, y_predict)
+        _, predict_tags = zip(*predict_pairs)
+        for predict in predict_tags:
+            predict = [vocab_tags_inv[tag_idx] for tag_idx in to_cpu(predict)]
+            print predict
+
+        return False
+
     tmax = args['max_iter']
     t = 0.0
     for epoch in xrange(args['max_iter']):
@@ -227,25 +281,7 @@ def train(train_file, **args):
         logging.info('  accuracy :' + str(train_accuracy))
         logging.info('  alpha    :' + str(opt.alpha))
 
-        def eval_loop(x_data, x_char_data, y_data):
-            # dev
-            net.set_train(train=False)
-            iteration_list = range(0, len(x_data), batchsize)
-            perm = np.random.permutation(len(x_data))
-            sum_loss = 0.0
-            predict_lists = []
-            for i_index, index in enumerate(iteration_list):
-                data = [(x_data[i], x_char_data[i], y_data[i])
-                        for i in perm[index:index + batchsize]]
-                x, x_char, target_y = zip(*data)
-
-                output = net(x_data=x, x_char_data=x_char)
-                predict, loss = net.predict(output, target_y)
-
-                sum_loss += loss.data
-                predict_lists.extend(predict)
-            return predict_lists, sum_loss
-
+        # Dev
         predict_dev, loss_dev = eval_loop(x_dev, x_char_dev, y_dev)
 
         # Evaluation
@@ -253,3 +289,8 @@ def train(train_file, **args):
         logging.info(' [dev]')
         logging.info('  loss     :' + str(loss_dev))
         logging.info('  accuracy :' + str(dev_accuracy))
+
+        # Save model
+        model_filename = save_name + '_epoch' + str(epoch)
+        serializers.save_hdf5(model_filename + '.model', net)
+        serializers.save_hdf5(model_filename + '.state', opt)

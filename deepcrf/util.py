@@ -53,6 +53,23 @@ def write_vocab(filename, vocab):
         f.write(line + '\n')
 
 
+def load_vocab(filename):
+    vocab = {}
+    for l in open(filename):
+        w, idx = l.decode('utf-8').strip().split(u'\t')
+        vocab[w] = int(idx)
+    return vocab
+
+
+def read_raw_file(filename, delimiter=u' '):
+    sentences = []
+    for l in open(filename):
+        words = l.decode('utf-8').strip().split(delimiter)
+        words = [(w, -1) for w in words]
+        sentences.append(words)
+    return sentences
+
+
 def read_conll_file(filename, delimiter=u'\t', input_idx=0, output_idx=-1):
     sentence = []
     sentences = []
@@ -106,6 +123,7 @@ def eval_accuracy(predict_lists):
         sum_cnt += len(gold)
         correct_cnt += sum(gold == pred)
 
+    sum_cnt = 1 if sum_cnt == 0 else sum_cnt
     accuracy = float(correct_cnt) / sum_cnt
     return accuracy
 
@@ -226,3 +244,25 @@ def IOB_to_range_format_one(tag_list, is_test_mode=False):
         ner = (ner[0], ner[-1], ner_type) if len(ner) > 1 else (ner[0], ner[0], ner_type)
         sentence_lst.append(ner)
     return sentence_lst
+
+
+def parse_to_word_ids(sentences, xp, vocab, UNK_IDX, idx=0):
+    x_data = [xp.array([vocab.get(w[idx].lower(), UNK_IDX)
+                        for w in sentence], dtype=xp.int32)
+              for sentence in sentences]
+    return x_data
+
+
+def parse_to_char_ids(sentences, xp, vocab_char, UNK_IDX, idx=0):
+    x_data = [[xp.array([vocab_char.get(c, UNK_IDX) for c in w[idx]],
+                        dtype=xp.int32)
+               for w in sentence]
+              for sentence in sentences]
+    return x_data
+
+
+def parse_to_tag_ids(sentences, xp, vocab, UNK_IDX, idx=-1):
+    x_data = [xp.array([vocab.get(w[idx], UNK_IDX)
+                        for w in sentence], dtype=xp.int32)
+              for sentence in sentences]
+    return x_data

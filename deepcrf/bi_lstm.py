@@ -24,7 +24,7 @@ import six
 to_cpu = chainer.cuda.to_cpu
 
 
-class BiLSTM(chainer.Chain):
+class BiLSTM_CNN_CRF(chainer.Chain):
 
     def __init__(self, n_vocab=None, n_char_vocab=None, emb_dim=100,
                  hidden_dim=200, init_emb=None, use_dropout=0.33, n_layers=1,
@@ -49,7 +49,7 @@ class BiLSTM(chainer.Chain):
 
         rnn_link = rnn_links[rnn_names.index(rnn_name)]
 
-        super(BiLSTM, self).__init__(
+        super(BiLSTM_CNN_CRF, self).__init__(
             word_embed=L.EmbedID(n_vocab, emb_dim, ignore_label=-1),
             rnn=rnn_link(n_layers=n_layers, in_size=feature_dim,
                          out_size=hidden_dim, dropout=use_dropout,
