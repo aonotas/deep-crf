@@ -74,7 +74,7 @@ def run(data_file, is_train=False, **args):
         sentences_train = util.read_raw_file(filename=data_file,
                                              delimiter=u' ')
 
-    sentences_train = sentences_train[:100]
+    # sentences_train = sentences_train[:100]
 
     sentences_dev = []
     sentences_test = []
