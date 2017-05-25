@@ -7,7 +7,7 @@ DeepCRF is a sequene labeling library that uses neural networks and CRFs in Pyth
 
 ## How to install?
 ```
-git clone https://github.com/aonotas/deep-crf
+git clone https://github.com/aonotas/deep-crf.git
 cd deep-crf
 python setup.py install
 ```
