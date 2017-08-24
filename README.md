@@ -15,6 +15,7 @@ python setup.py install
 ## How to train?
 ### train [Ma and Hovy (2016)](https://arxiv.org/abs/1603.01354) model
 ```
+$ mkdir save_model_dir
 $ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf
 ```
 ### Deep BiLSTM-CNN-CRF model (three layers)
