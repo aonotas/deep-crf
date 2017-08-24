@@ -44,9 +44,29 @@ $ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-cr
 
 ## How to predict?
 ```
-$ deep-crf predict input_raw_file.txt --model_name bilstm-cnn-crf --model_filename bilstm-cnn-crf_adam.model
+$ deep-crf predict input_raw_file.txt --model_name bilstm-cnn-crf --model_filename bilstm-cnn-crf_adam.model --predicted_output predicted.txt
 ```
 
+## How to evaluate?
+```
+$ deep-crf eval gold.txt predicted.txt
+$ head gold.txt
+O
+O
+B-LOC
+O
+O
+
+B-PERSON
+```
+
+
+## How to update?
+```
+cd deep-crf
+git pull
+python setup.py install
+```
 
 ## Features
 DeepCRF provides following features.
