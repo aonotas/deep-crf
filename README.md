@@ -44,7 +44,7 @@ $ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-cr
 
 ## How to predict?
 ```
-$ deep-crf predict input_raw_file.txt --model_name bilstm-cnn-crf --model_filename bilstm-cnn-crf_adam.model --predicted_output predicted.txt
+$ deep-crf predict input_raw_file.txt --model_name bilstm-cnn-crf --model_filename bilstm-cnn-crf_adam_epoch10.model --predicted_output predicted.txt
 ```
 
 ## How to evaluate?
