@@ -18,6 +18,17 @@ python setup.py install
 $ mkdir save_model_dir
 $ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf
 ```
+```
+$ cat input_file_multi.txt
+Barack  B−PERSON 
+Hussein I−PERSON 
+Obama   E−PERSON
+is      O 
+a       O 
+man     O 
+.       O
+```
+
 ### Deep BiLSTM-CNN-CRF model (three layers)
 ```
 $ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_layer 3
