@@ -192,7 +192,7 @@ def conll_eval(gold_predict_pairs, flag=True, tag_class=None):
             cnt_phrases_dict[tag_name]['predict_cnt']) if cnt_phrases_dict[tag_name]['predict_cnt'] else 0.0
         sum_recall_precision = 1.0 if recall + precision == 0.0 else recall + precision
         f_measure = (2 * recall * precision) / (sum_recall_precision)
-        evals[tag_name] = [precision, recall, f_measure]
+        evals[tag_name] = [precision * 100.0, recall * 100.0, f_measure * 100.0]
 
     correct_cnt = sum([ev['correct_cnt'] for tag_name, ev in cnt_phrases_dict.items()])
     gold_cnt = sum([ev['gold_cnt'] for tag_name, ev in cnt_phrases_dict.items()])
@@ -202,7 +202,7 @@ def conll_eval(gold_predict_pairs, flag=True, tag_class=None):
     precision = correct_cnt / float(predict_cnt) if predict_cnt else 0.0
     sum_recall_precision = 1.0 if recall + precision == 0.0 else recall + precision
     f_measure = (2 * recall * precision) / (sum_recall_precision)
-    evals['all'] = [precision, recall, f_measure]
+    evals['All_Result'] = [precision * 100.0, recall * 100.0, f_measure * 100.0]
     return evals, phrase_info
 
 
@@ -244,6 +244,18 @@ def IOB_to_range_format_one(tag_list, is_test_mode=False):
         ner = (ner[0], ner[-1], ner_type) if len(ner) > 1 else (ner[0], ner[0], ner_type)
         sentence_lst.append(ner)
     return sentence_lst
+
+
+def range_metric_cnt(gold_range_list, predict_range_list):
+    gold_range_set = set(gold_range_list)
+    predict_range_set = set(predict_range_list)
+    TP = gold_range_set & predict_range_set
+    _g = len(gold_range_set)
+    _p = len(predict_range_set)
+    correct_cnt = len(TP)
+    gold_cnt = _g
+    predict_cnt = _p
+    return correct_cnt, gold_cnt, predict_cnt
 
 
 def parse_to_word_ids(sentences, xp, vocab, UNK_IDX, idx=0):

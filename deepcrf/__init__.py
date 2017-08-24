@@ -2,6 +2,7 @@ import click
 import logging
 
 import main
+import evaluate
 
 
 @click.group()
@@ -79,7 +80,17 @@ def train(train_file, **args):
               help='delimiter string')
 @click.option('--save_name', type=str, default='',
               help='save_name')
+@click.option('--predicted_output', type=str, default='',
+              help='predicted_output')
 @click.option('--model_filename', type=str, default='',
               help='model_filename')
 def predict(input_file, **args):
     main.run(input_file, is_train=False, **args)
+
+
+@cli.command()
+@click.argument('gold_file', type=click.Path(exists=True))
+@click.argument('predicted_file', type=click.Path(exists=True))
+@click.option('--tag_type', type=str, default='BIOES', help='select from [BIO, BIOES]')
+def eval(gold_file, predicted_file, **args):
+    evaluate.run(gold_file, predicted_file, **args)

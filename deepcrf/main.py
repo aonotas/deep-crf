@@ -211,13 +211,13 @@ def run(data_file, is_train=False, **args):
         # dev or test
         net.set_train(train=False)
         iteration_list = range(0, len(x_data), batchsize)
-        perm = np.random.permutation(len(x_data))
+        # perm = np.random.permutation(len(x_data))
         sum_loss = 0.0
         predict_lists = []
         for i_index, index in enumerate(iteration_list):
-            data = [(x_data[i], x_char_data[i], y_data[i])
-                    for i in perm[index:index + batchsize]]
-            x, x_char, target_y = zip(*data)
+            x = x_data[index:index + batchsize]
+            x_char = x_char_data[index:index + batchsize]
+            target_y = y_data[index:index + batchsize]
 
             output = net(x_data=x, x_char_data=x_char)
             predict, loss = net.predict(output, target_y)
@@ -238,9 +238,18 @@ def run(data_file, is_train=False, **args):
         y_predict = y_train
         predict_pairs, _ = eval_loop(x_predict, x_char_predict, y_predict)
         _, predict_tags = zip(*predict_pairs)
+        predicted_output = args['predicted_output']
+        predicted_results = []
         for predict in predict_tags:
-            predict = [vocab_tags_inv[tag_idx] for tag_idx in to_cpu(predict)]
-            print predict
+            predicted = [vocab_tags_inv[tag_idx] for tag_idx in to_cpu(predict)]
+            predicted_results.append(predicted)
+
+        f = open(predicted_output, 'w')
+        for predicted in predicted_results:
+            for tag in predicted:
+                f.write(tag + '\n')
+            f.write('\n')
+        f.close()
 
         return False
 
