@@ -192,7 +192,7 @@ def run(data_file, is_train=False, **args):
         word_ids, word_vecs = util.load_glove_embedding(emb_file, vocab)
         net.word_embed.W.data[word_ids] = word_vecs
 
-    if args['return_model']:
+    if args.get(return_model):
         return net
 
     if args['gpu'] >= 0:
