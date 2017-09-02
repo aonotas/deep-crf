@@ -179,6 +179,7 @@ def run(data_file, is_train=False, **args):
         util.write_vocab(save_tags_vocab, vocab_tags)
         util.write_vocab(save_train_config, args)
 
+    init_emb = None
     if args['word_emb_file']:
         # set Pre-trained embeddings
         # emb_file = './emb/glove.6B.100d.txt'
@@ -187,12 +188,13 @@ def run(data_file, is_train=False, **args):
 
         # replace vocab
         vocab = vocab_glove
-        net.word_embed.W.data[word_ids] = word_vecs
+        init_emb = word_vecs
+        # net.word_embed.W.data[word_ids] = word_vecs
 
     net = BiLSTM_CNN_CRF(n_vocab=len(vocab), n_char_vocab=len(vocab_char),
                          emb_dim=args['n_word_emb'],
                          hidden_dim=args['n_hidden'],
-                         n_layers=args['n_layer'], init_emb=None,
+                         n_layers=args['n_layer'], init_emb=init_emb,
                          n_label=len(vocab_tags))
 
     if args.get('return_model', False):

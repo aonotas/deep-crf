@@ -56,6 +56,8 @@ class BiLSTM_CNN_CRF(chainer.Chain):
                          use_cudnn=True),
             output_layer=L.Linear(hidden_dim * n_dir, n_label),
         )
+        if init_emb is not None:
+            self.word_embed.W.data[:] = init_emb[:]
 
         if use_char:
 
