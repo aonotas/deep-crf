@@ -113,6 +113,29 @@ def load_glove_embedding(filename, vocab):
     word_vecs = np.array(word_vecs, dtype=np.float32)
     return word_ids, word_vecs
 
+
+def load_glove_embedding_include_vocab(filename):
+    word_vecs = []
+    vocab = {}
+    vocab[PADDING] = len(vocab)
+    vocab[UNKWORD] = len(vocab)
+
+    for i, l in enumerate(open(filename)):
+        l = l.decode('utf-8').split(u' ')
+        word = l[0].lower()
+        if word not in word:
+            vocab[word] = len(vocab)
+            vec = l[1:]
+            vec = map(float, vec)
+            word_vecs.append(vec)
+
+    # PADDING, UNKWORD
+    word_vecs.insert(0, np.random.random((len(vec),)))
+    word_vecs.insert(0, np.random.random((len(vec),)))
+
+    word_vecs = np.array(word_vecs, dtype=np.float32)
+    return word_vecs, vocab
+
 # Conll 03 shared task evaluation code (IOB format only)
 
 
