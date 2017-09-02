@@ -255,6 +255,7 @@ def run(data_file, is_train=False, **args):
 
     tmax = args['max_iter']
     t = 0.0
+    prev_dev_accuracy = 0.0
     for epoch in xrange(args['max_iter']):
 
         # train
@@ -298,7 +299,14 @@ def run(data_file, is_train=False, **args):
         logging.info('  loss     :' + str(loss_dev))
         logging.info('  accuracy :' + str(dev_accuracy))
 
-        # Save model
-        model_filename = save_name + '_epoch' + str(epoch)
-        serializers.save_hdf5(model_filename + '.model', net)
-        serializers.save_hdf5(model_filename + '.state', opt)
+        if prev_dev_accuracy < dev_accuracy:
+            logging.info(' [update best model on dev set!]')
+            dev_list = [prev_dev_accuracy, dev_accuracy]
+            dev_str = '       ' + ' => '.join(map(str, dev_list))
+            logging.info(dev_str)
+            prev_dev_accuracy = dev_accuracy
+
+            # Save model
+            model_filename = save_name + '_epoch' + str(epoch)
+            serializers.save_hdf5(model_filename + '.model', net)
+            serializers.save_hdf5(model_filename + '.state', opt)
