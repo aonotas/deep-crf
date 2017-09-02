@@ -123,7 +123,7 @@ def load_glove_embedding_include_vocab(filename):
     for i, l in enumerate(open(filename)):
         l = l.decode('utf-8').split(u' ')
         word = l[0].lower()
-        if word not in word:
+        if word not in vocab:
             vocab[word] = len(vocab)
             vec = l[1:]
             vec = map(float, vec)
