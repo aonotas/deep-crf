@@ -173,10 +173,11 @@ def run(data_file, is_train=False, **args):
     logging.info('save_vocab_char   :' + save_vocab_char)
     logging.info('save_tags_vocab   :' + save_tags_vocab)
     logging.info('save_train_config :' + save_train_config)
-    util.write_vocab(save_vocab, vocab)
-    util.write_vocab(save_vocab_char, vocab_char)
-    util.write_vocab(save_tags_vocab, vocab_tags)
-    util.write_vocab(save_train_config, args)
+    if is_train:
+        util.write_vocab(save_vocab, vocab)
+        util.write_vocab(save_vocab_char, vocab_char)
+        util.write_vocab(save_tags_vocab, vocab_tags)
+        util.write_vocab(save_train_config, args)
 
     net = BiLSTM_CNN_CRF(n_vocab=len(vocab), n_char_vocab=len(vocab_char),
                          emb_dim=args['n_word_emb'],
@@ -190,6 +191,9 @@ def run(data_file, is_train=False, **args):
         emb_file = args['word_emb_file']
         word_ids, word_vecs = util.load_glove_embedding(emb_file, vocab)
         net.word_embed.W.data[word_ids] = word_vecs
+
+    if args['return_model']:
+        return net
 
     if args['gpu'] >= 0:
         net.to_gpu()

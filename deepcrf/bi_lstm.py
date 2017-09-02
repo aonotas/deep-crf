@@ -105,7 +105,9 @@ class BiLSTM_CNN_CRF(chainer.Chain):
         inds_rev = sorted([(i, ind) for i, ind in enumerate(inds)], key=lambda x: x[1])
 
         hs = [predict_list[i] for i in inds]
-        ts_original = [self.xp.array(t[i], self.xp.int32) for i in inds]
+        ts_original = None
+        if compute_loss:
+            ts_original = [self.xp.array(t[i], self.xp.int32) for i in inds]
 
         hs = F.transpose_sequence(hs)
 
@@ -120,13 +122,17 @@ class BiLSTM_CNN_CRF(chainer.Chain):
 
         predicts = F.transpose_sequence(predicts_trans)
         gold_predict_pairs = []
-        for pred, gold in zip(predicts, ts_original):
-            pred = to_cpu(pred.data)
-            gold = to_cpu(gold)
-            gold_predict_pairs.append([gold, pred])
+        if compute_loss:
+            for pred, gold in zip(predicts, ts_original):
+                pred = to_cpu(pred.data)
+                gold = to_cpu(gold)
+                gold_predict_pairs.append([gold, pred])
+        else:
+            for pred in predicts:
+                pred = to_cpu(pred.data)
+                gold_predict_pairs.append([pred])
 
         gold_predict_pairs = [gold_predict_pairs[e_i] for e_i, _ in inds_rev]
-
         self.y = gold_predict_pairs
 
         return gold_predict_pairs, loss
