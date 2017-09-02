@@ -173,11 +173,6 @@ def run(data_file, is_train=False, **args):
     logging.info('save_vocab_char   :' + save_vocab_char)
     logging.info('save_tags_vocab   :' + save_tags_vocab)
     logging.info('save_train_config :' + save_train_config)
-    if is_train:
-        util.write_vocab(save_vocab, vocab)
-        util.write_vocab(save_vocab_char, vocab_char)
-        util.write_vocab(save_tags_vocab, vocab_tags)
-        util.write_vocab(save_train_config, args)
 
     init_emb = None
     if args['word_emb_file']:
@@ -189,7 +184,12 @@ def run(data_file, is_train=False, **args):
         # replace vocab
         vocab = vocab_glove
         init_emb = word_vecs
-        # net.word_embed.W.data[word_ids] = word_vecs
+
+    if is_train:
+        util.write_vocab(save_vocab, vocab)
+        util.write_vocab(save_vocab_char, vocab_char)
+        util.write_vocab(save_tags_vocab, vocab_tags)
+        util.write_vocab(save_train_config, args)
 
     net = BiLSTM_CNN_CRF(n_vocab=len(vocab), n_char_vocab=len(vocab_char),
                          emb_dim=args['n_word_emb'],
