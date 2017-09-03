@@ -31,8 +31,10 @@ def cli():
               help='min count of vocab.')
 @click.option('--n_word_emb', type=int, default=100,
               help='word embedding size.')
-@click.option('--n_char_emb', type=int, default=50,
+@click.option('--n_char_emb', type=int, default=30,
               help='character embedding size.')
+@click.option('--n_char_hidden', type=int, default=30,
+              help='character hidden vector size.')
 @click.option('--dropout_rate', type=float, default=0.33)
 @click.option('--gpu', type=int, default=-1,
               help='gpu ID. when gpu=-1 use CPU mode.')
@@ -68,8 +70,10 @@ def train(train_file, **args):
               help='min count of vocab.')
 @click.option('--n_word_emb', type=int, default=100,
               help='word embedding size.')
-@click.option('--n_char_emb', type=int, default=50,
+@click.option('--n_char_emb', type=int, default=30,
               help='character embedding size.')
+@click.option('--n_char_hidden', type=int, default=30,
+              help='character hidden vector size.')
 @click.option('--dropout_rate', type=float, default=0.33)
 @click.option('--gpu', type=int, default=-1,
               help='gpu ID. when gpu=-1 use CPU mode.')

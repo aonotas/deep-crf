@@ -195,6 +195,8 @@ def run(data_file, is_train=False, **args):
                          emb_dim=args['n_word_emb'],
                          hidden_dim=args['n_hidden'],
                          n_layers=args['n_layer'], init_emb=init_emb,
+                         char_input_dim=args['n_char_emb'],
+                         char_hidden_dim=args['n_char_hidden'],
                          n_label=len(vocab_tags))
 
     if args.get('return_model', False):
@@ -235,11 +237,15 @@ def run(data_file, is_train=False, **args):
             predict_lists.extend(predict)
         return predict_lists, sum_loss
 
+    if args['model_filename']:
+        model_filename = args['model_filename']
+        serializers.load_hdf5(model_filename, net)
+
     if is_test:
         # predict
-        model_filename = args['model_filename']
-        model_filename = save_dir + model_filename
-        serializers.load_hdf5(model_filename, net)
+        # model_filename = args['model_filename']
+        # model_filename = save_dir + model_filename
+        # serializers.load_hdf5(model_filename, net)
 
         vocab_tags_inv = dict([(v, k) for k, v in vocab_tags.items()])
         x_predict = x_train
