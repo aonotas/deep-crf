@@ -43,6 +43,7 @@ def cli():
 @click.option('--vocab_char_file', type=click.Path())
 @click.option('--dev_file', type=click.Path())
 @click.option('--test_file', type=click.Path())
+@click.option('--model_filename', type=click.Path())
 @click.option('--delimiter', type=str, default='\t',
               help='delimiter string')
 @click.option('--save_name', type=str, default='',
@@ -88,8 +89,7 @@ def train(train_file, **args):
               help='save_name')
 @click.option('--predicted_output', type=str, default='',
               help='predicted_output')
-@click.option('--model_filename', type=str, default='',
-              help='model_filename')
+@click.option('--model_filename', type=click.Path())
 def predict(input_file, **args):
     main.run(input_file, is_train=False, **args)
 
