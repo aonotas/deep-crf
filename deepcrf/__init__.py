@@ -83,6 +83,8 @@ def train(train_file, **args):
 @click.option('--word_emb_file', type=click.Path())
 @click.option('--dev_file', type=click.Path())
 @click.option('--test_file', type=click.Path())
+@click.option('--vocab_file', type=click.Path())
+@click.option('--vocab_char_file', type=click.Path())
 @click.option('--delimiter', type=str, default='\t',
               help='delimiter string')
 @click.option('--save_name', type=str, default='',
