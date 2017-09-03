@@ -191,6 +191,14 @@ def run(data_file, is_train=False, **args):
         util.write_vocab(save_tags_vocab, vocab_tags)
         util.write_vocab(save_train_config, args)
 
+    if args.get('vocab_file', False):
+        vocab_file = args['vocab_file']
+        vocab = util.load_vocab(vocab_file)
+
+    if args.get('vocab_char_file', False):
+        vocab_char_file = args['vocab_char_file']
+        vocab_char = util.load_vocab(vocab_char_file)
+
     net = BiLSTM_CNN_CRF(n_vocab=len(vocab), n_char_vocab=len(vocab_char),
                          emb_dim=args['n_word_emb'],
                          hidden_dim=args['n_hidden'],

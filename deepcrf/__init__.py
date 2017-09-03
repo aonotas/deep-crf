@@ -39,6 +39,8 @@ def cli():
 @click.option('--gpu', type=int, default=-1,
               help='gpu ID. when gpu=-1 use CPU mode.')
 @click.option('--word_emb_file', type=click.Path())
+@click.option('--vocab_file', type=click.Path())
+@click.option('--vocab_char_file', type=click.Path())
 @click.option('--dev_file', type=click.Path())
 @click.option('--test_file', type=click.Path())
 @click.option('--delimiter', type=str, default='\t',
