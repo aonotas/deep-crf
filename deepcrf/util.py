@@ -311,3 +311,12 @@ def parse_raw_text(sentence, xp, vocab, vocab_char, UNK_IDX, CHAR_UNK_IDX):
                              dtype=xp.int32) for w in sentence]]
 
     return x_data, x_data_char
+
+
+def uniq_tagset(alltags_list, tag_names=[]):
+    for tags in alltags_list:
+        for tag in tags:
+            tagname = '-'.join(tag.split(u'-')[1:])
+            if tagname != u'' and tagname not in tag_names:
+                tag_names.append(tagname)
+    return tag_names
