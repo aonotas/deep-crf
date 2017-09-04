@@ -102,6 +102,14 @@ def run(data_file, is_train=False, **args):
         vocab_char = util.load_vocab(save_vocab_char)
         vocab_tags = util.load_vocab(save_tags_vocab)
 
+    if args.get('vocab_file', False):
+        vocab_file = args['vocab_file']
+        vocab = util.load_vocab(vocab_file)
+
+    if args.get('vocab_char_file', False):
+        vocab_char_file = args['vocab_char_file']
+        vocab_char = util.load_vocab(vocab_char_file)
+
     vocab_tags_inv = dict((v, k) for k, v in vocab_tags.items())
     PAD_IDX = vocab[PADDING]
     UNK_IDX = vocab[UNKWORD]
@@ -190,14 +198,6 @@ def run(data_file, is_train=False, **args):
         util.write_vocab(save_tags_vocab, vocab_tags)
         util.write_vocab(save_train_config, args)
 
-    if args.get('vocab_file', False):
-        vocab_file = args['vocab_file']
-        vocab = util.load_vocab(vocab_file)
-
-    if args.get('vocab_char_file', False):
-        vocab_char_file = args['vocab_char_file']
-        vocab_char = util.load_vocab(vocab_char_file)
-
     net = BiLSTM_CNN_CRF(n_vocab=len(vocab), n_char_vocab=len(vocab_char),
                          emb_dim=args['n_word_emb'],
                          hidden_dim=args['n_hidden'],
@@ -268,7 +268,6 @@ def run(data_file, is_train=False, **args):
         # model_filename = args['model_filename']
         # model_filename = save_dir + model_filename
         # serializers.load_hdf5(model_filename, net)
-        net.set_train(train=False)
         vocab_tags_inv = dict([(v, k) for k, v in vocab_tags.items()])
         x_predict = x_train
         x_char_predict = x_char_train
