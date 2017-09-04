@@ -102,6 +102,7 @@ def run(data_file, is_train=False, **args):
         vocab_char = util.load_vocab(save_vocab_char)
         vocab_tags = util.load_vocab(save_tags_vocab)
 
+    vocab_tags_inv = dict((v, k) for k, v in vocab_tags.items())
     PAD_IDX = vocab[PADDING]
     UNK_IDX = vocab[UNKWORD]
 
@@ -133,8 +134,11 @@ def run(data_file, is_train=False, **args):
     x_dev = parse_to_word_ids(sentences_dev)
     x_char_dev = parse_to_char_ids(sentences_dev)
     y_dev = parse_to_tag_ids(sentences_dev)
-    y_dev_cpu = util.parse_to_tag_ids(sentences_dev, xp=np, vocab=vocab_tags,
-                                      UNK_IDX=-1, idx=-1)
+
+    y_dev_cpu = [[w[-1] for w in sentence]
+                 for sentence in sentences_dev]
+    # y_dev_cpu = util.parse_to_tag_ids(sentences_dev, xp=np, vocab=vocab_tags,
+    #                                   UNK_IDX=-1, idx=-1)
     # tag_names = []
     tag_names = list(set([tag[2:] if len(tag) >= 2 else tag[0] for tag in vocab_tags.keys()]))
 
@@ -246,7 +250,14 @@ def run(data_file, is_train=False, **args):
 
             sum_loss += loss.data
             predict_lists.extend(predict)
-        return predict_lists, sum_loss
+
+        _, predict_tags = zip(*predict_lists)
+        predicted_results = []
+        for predict in predict_tags:
+            predicted = [vocab_tags_inv[tag_idx] for tag_idx in to_cpu(predict)]
+            predicted_results.append(predicted)
+
+        return predict_lists, sum_loss, predicted_results
 
     if args['model_filename']:
         model_filename = args['model_filename']
@@ -262,7 +273,7 @@ def run(data_file, is_train=False, **args):
         x_predict = x_train
         x_char_predict = x_char_train
         y_predict = y_train
-        predict_pairs, _ = eval_loop(x_predict, x_char_predict, y_predict)
+        predict_pairs, _, _tmp = eval_loop(x_predict, x_char_predict, y_predict)
         _, predict_tags = zip(*predict_pairs)
         predicted_output = args['predicted_output']
         predicted_results = []
@@ -318,9 +329,9 @@ def run(data_file, is_train=False, **args):
         logging.info('  accuracy :' + str(train_accuracy))
 
         # Dev
-        predict_dev, loss_dev = eval_loop(x_dev, x_char_dev, y_dev)
+        predict_dev, loss_dev, predict_dev_tags = eval_loop(x_dev, x_char_dev, y_dev)
 
-        gold_predict_pairs = [y_dev_cpu, predict_dev]
+        gold_predict_pairs = [y_dev_cpu, predict_dev_tags]
         result, phrase_info = util.conll_eval(gold_predict_pairs, flag=False, tag_class=tag_names)
         all_result = result['All_Result']
 
