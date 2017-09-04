@@ -133,7 +133,7 @@ def run(data_file, is_train=False, **args):
     x_dev = parse_to_word_ids(sentences_dev)
     x_char_dev = parse_to_char_ids(sentences_dev)
     y_dev = parse_to_tag_ids(sentences_dev)
-    y_dev_cpu = util.parse_to_tag_ids(sentences, xp=np, vocab=vocab_tags,
+    y_dev_cpu = util.parse_to_tag_ids(sentences_dev, xp=np, vocab=vocab_tags,
                                       UNK_IDX=-1, idx=-1)
     tag_names = []
     tag_names = uniq_tagset(y_dev_cpu, tag_names)
