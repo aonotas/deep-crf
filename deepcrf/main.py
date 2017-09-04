@@ -203,7 +203,7 @@ def run(data_file, is_train=False, **args):
         # emb_file = './emb/glove.6B.100d.txt'
         emb_file = args['word_emb_file']
         # word_vecs, vocab_glove = util.load_glove_embedding_include_vocab(emb_file)
-        word_ids, word_vecs = util.load_glove_embedding(emb_file)
+        word_ids, word_vecs = util.load_glove_embedding(emb_file, vocab)
         net.word_embed.W.data[word_ids] = word_vecs[:]
 
     if args.get('return_model', False):
