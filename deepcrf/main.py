@@ -268,22 +268,20 @@ def run(data_file, is_train=False, **args):
         # model_filename = args['model_filename']
         # model_filename = save_dir + model_filename
         # serializers.load_hdf5(model_filename, net)
-
-        y_test_cpu = [[w[-1] for w in sentence]
-                      for sentence in sentences_train]
-
         net.set_train(train=False)
         vocab_tags_inv = dict([(v, k) for k, v in vocab_tags.items()])
         x_predict = x_train
         x_char_predict = x_char_train
         y_predict = y_train
-        predict_pairs, _, predict_test_tags = eval_loop(x_predict, x_char_predict, y_predict)
 
-        gold_predict_pairs = [y_test_cpu, predict_test_tags]
+        predict_dev, loss_dev, predict_dev_tags = eval_loop(x_dev, x_char_dev, y_dev)
+
+        gold_predict_pairs = [y_dev_cpu, predict_dev_tags]
         result, phrase_info = util.conll_eval(gold_predict_pairs, flag=False, tag_class=tag_names)
         all_result = result['All_Result']
         print 'all_result:', all_result
 
+        predict_pairs, _, _tmp = eval_loop(x_predict, x_char_predict, y_predict)
         _, predict_tags = zip(*predict_pairs)
         predicted_output = args['predicted_output']
         predicted_results = []
