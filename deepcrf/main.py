@@ -135,8 +135,8 @@ def run(data_file, is_train=False, **args):
     y_dev = parse_to_tag_ids(sentences_dev)
     y_dev_cpu = util.parse_to_tag_ids(sentences_dev, xp=np, vocab=vocab_tags,
                                       UNK_IDX=-1, idx=-1)
-    tag_names = []
-    tag_names = util.uniq_tagset(y_dev_cpu, tag_names)
+    # tag_names = []
+    tag_names = list(set([tag[2:] if len(tag) >= 2 else tag[0] for tag in vocab_tags.keys()]))
 
     x_test = parse_to_word_ids(sentences_test)
     x_char_test = parse_to_char_ids(sentences_test)
