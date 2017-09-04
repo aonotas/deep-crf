@@ -268,7 +268,7 @@ def run(data_file, is_train=False, **args):
         # model_filename = args['model_filename']
         # model_filename = save_dir + model_filename
         # serializers.load_hdf5(model_filename, net)
-
+        net.set_train(train=False)
         vocab_tags_inv = dict([(v, k) for k, v in vocab_tags.items()])
         x_predict = x_train
         x_char_predict = x_char_train
