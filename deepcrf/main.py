@@ -175,15 +175,6 @@ def run(data_file, is_train=False, **args):
     logging.info('save_train_config :' + save_train_config)
 
     init_emb = None
-    if args['word_emb_file']:
-        # set Pre-trained embeddings
-        # emb_file = './emb/glove.6B.100d.txt'
-        emb_file = args['word_emb_file']
-        word_vecs, vocab_glove = util.load_glove_embedding_include_vocab(emb_file)
-
-        # replace vocab
-        vocab = vocab_glove
-        init_emb = word_vecs
 
     if is_train:
         util.write_vocab(save_vocab, vocab)
@@ -206,6 +197,14 @@ def run(data_file, is_train=False, **args):
                          char_input_dim=args['n_char_emb'],
                          char_hidden_dim=args['n_char_hidden'],
                          n_label=len(vocab_tags))
+
+    if args['word_emb_file']:
+        # set Pre-trained embeddings
+        # emb_file = './emb/glove.6B.100d.txt'
+        emb_file = args['word_emb_file']
+        # word_vecs, vocab_glove = util.load_glove_embedding_include_vocab(emb_file)
+        word_ids, word_vecs = util.load_glove_embedding(emb_file)
+        net.word_embed.W.data[word_ids] = word_vecs[:]
 
     if args.get('return_model', False):
         return net
