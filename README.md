@@ -12,6 +12,11 @@ cd deep-crf
 python setup.py install
 ```
 
+Note that Chainer version is `1.2.40`
+```
+pip install 'chainer==1.24.0'
+```
+
 ## How to train?
 ### train [Ma and Hovy (2016)](https://arxiv.org/abs/1603.01354) model
 ```
