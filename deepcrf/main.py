@@ -133,6 +133,10 @@ def run(data_file, is_train=False, **args):
     x_dev = parse_to_word_ids(sentences_dev)
     x_char_dev = parse_to_char_ids(sentences_dev)
     y_dev = parse_to_tag_ids(sentences_dev)
+    y_dev_cpu = util.parse_to_tag_ids(sentences, xp=np, vocab=vocab_tags,
+                                      UNK_IDX=-1, idx=-1)
+    tag_names = []
+    tag_names = uniq_tagset(y_dev_cpu, tag_names)
 
     x_test = parse_to_word_ids(sentences_test)
     x_char_test = parse_to_char_ids(sentences_test)
@@ -278,6 +282,7 @@ def run(data_file, is_train=False, **args):
     tmax = args['max_iter']
     t = 0.0
     prev_dev_accuracy = 0.0
+    prev_dev_f = 0.0
     for epoch in xrange(args['max_iter']):
 
         # train
@@ -315,18 +320,25 @@ def run(data_file, is_train=False, **args):
         # Dev
         predict_dev, loss_dev = eval_loop(x_dev, x_char_dev, y_dev)
 
+        gold_predict_pairs = [y_dev_cpu, predict_dev]
+        result, phrase_info = util.conll_eval(gold_predict_pairs, flag=False, tag_class=tag_names)
+        all_result = result['All_Result']
+
         # Evaluation
         dev_accuracy = util.eval_accuracy(predict_dev)
         logging.info(' [dev]')
         logging.info('  loss     :' + str(loss_dev))
         logging.info('  accuracy :' + str(dev_accuracy))
+        logging.info('  f_measure :' + str(all_result[-1]))
 
-        if prev_dev_accuracy < dev_accuracy:
+        dev_f = all_result[-1]
+
+        if prev_dev_f < dev_f:
             logging.info(' [update best model on dev set!]')
-            dev_list = [prev_dev_accuracy, dev_accuracy]
+            dev_list = [prev_dev_f, dev_f]
             dev_str = '       ' + ' => '.join(map(str, dev_list))
             logging.info(dev_str)
-            prev_dev_accuracy = dev_accuracy
+            prev_dev_f = dev_f
 
             # Save model
             model_filename = save_name + '_epoch' + str(epoch)
