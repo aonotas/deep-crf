@@ -24,7 +24,7 @@ $ mkdir save_model_dir
 $ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf
 ```
 ```
-$ cat input_file_multi.txt
+$ cat input_file.txt
 Barack  B−PERSON 
 Hussein I−PERSON 
 Obama   E−PERSON
@@ -40,6 +40,11 @@ a      O
 man    O 
 .      O
 ```
+Each line is `word` and `gold tag`.
+One line is represented by `word` `[ ](space)` `gold tag`.
+Note you should put `empty line (\n)` between sentences.
+This format is called CoNLL format.
+
 
 ### Deep BiLSTM-CNN-CRF model (three layers)
 ```
