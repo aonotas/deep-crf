@@ -32,6 +32,13 @@ is      O
 a       O 
 man     O 
 .       O
+
+Yuji   B−PERSON 
+Matsumoto E−PERSON 
+is     O 
+a      O 
+man    O 
+.      O
 ```
 
 ### Deep BiLSTM-CNN-CRF model (three layers)
@@ -43,6 +50,13 @@ $ cat input_file_multi.txt
 Barack  NN B−PERSON 
 Hussein NN I−PERSON 
 Obama   NN E−PERSON
+is      VBZ O 
+a       DT  O 
+man     NN  O 
+.       .   O
+
+Yuji  NN B−PERSON 
+Matsumoto NN E−PERSON 
 is      VBZ O 
 a       DT  O 
 man     NN  O 
