@@ -50,6 +50,18 @@ This format is called CoNLL format.
 ```
 $ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_layer 3
 ```
+
+### Set Pretrained Word Embeddings 
+```
+$ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_layer 3 --word_emb_file ./glove.6B.100d.txt
+```
+(Now only support Glove vecotr format. I will support word2vec format.)
+
+### Additional Feature Support
+```
+$ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-crf −−input idx 0,1 −−output idx 2
+```
+
 ```
 $ cat input_file_multi.txt
 Barack  NN B−PERSON 
@@ -66,10 +78,6 @@ is      VBZ O
 a       DT  O 
 man     NN  O 
 .       .   O
-```
-### Additional Feature Support
-```
-$ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-crf −−input idx 0,1 −−output idx 2
 ```
 
 ### Multi-Task Learning Support
