@@ -42,7 +42,7 @@ man    O
 ```
 Each line is `word` and `gold tag`.
 One line is represented by `word` `[ ](space)` `gold tag`.
-Note you should put `empty line (\n)` between sentences.
+Note that you should put `empty line (\n)` between sentences.
 This format is called CoNLL format.
 
 
