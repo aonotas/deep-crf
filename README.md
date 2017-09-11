@@ -90,6 +90,13 @@ $ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-cr
 $ deep-crf predict input_raw_file.txt --model_name bilstm-cnn-crf --model_filename bilstm-cnn-crf_adam_epoch10.model --predicted_output predicted.txt
 ```
 
+Please use following format when `predict`.
+```
+$ cat input_raw_file.txt
+Barack Hussein Obama is a man .
+Yuji Matsumoto is a man .
+```
+
 ## How to evaluate?
 ```
 $ deep-crf eval gold.txt predicted.txt
