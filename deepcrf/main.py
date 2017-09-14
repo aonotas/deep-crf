@@ -227,7 +227,7 @@ def run(data_file, is_train=False, **args):
             # replace all vocab by Pre-trained embeddings
             word_vecs, vocab_glove = util.load_glove_embedding_include_vocab(emb_file)
             assert_word_emb_shape(word_vecs.shape[1], net.word_embed.W.shape[1])
-            net.word_embed.W.data[:] = word_vecs[:]
+            net.word_embed.W.data = word_vecs[:]
             vocab = vocab_glove
         elif word_emb_vocab_type == 'replace_only':
             word_ids, word_vecs = util.load_glove_embedding(emb_file, vocab)
@@ -239,11 +239,14 @@ def run(data_file, is_train=False, **args):
             word_vecs, vocab_glove = util.load_glove_embedding_include_vocab(emb_file)
             assert_word_emb_shape(word_vecs.shape[1], net.word_embed.W.shape[1])
 
+            additional_vecs = []
             for word, word_idx in sorted(vocab_glove.items(), key=lambda x: x[1]):
                 if word not in vocab:
                     vocab[word] = len(word)
+                    additional_vecs.append(word_vecs[word_idx])
+            additional_vecs = np.array(additional_vecs, dtype=np.float32)
 
-            net.word_embed.W.data = word_vecs[:]
+            net.word_embed.W.data = np.concatenate([word_vecs, additional_vecs], axis=0)
 
     if args.get('return_model', False):
         return net
