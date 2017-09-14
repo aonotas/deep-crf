@@ -25,6 +25,17 @@ logger = logging.getLogger(__name__)
 to_cpu = chainer.cuda.to_cpu
 import os.path
 
+version = chainer.__version__
+
+
+def my_cudnn(cudnn_flag):
+    if version >= '2.0':
+        if cudnn_flag:
+            chainer.config.use_cudnn = 'always'
+            # chainer.config.cudnn_deterministic = True
+        else:
+            chainer.config.use_cudnn = 'never'
+
 
 def run(data_file, is_train=False, **args):
     is_test = not is_train
@@ -253,7 +264,9 @@ def run(data_file, is_train=False, **args):
                          n_label=len(vocab_tags),
                          n_add_feature_dim=args['n_add_feature_emb'],
                          n_add_feature=len(n_vocab_add),
-                         n_vocab_add=n_vocab_add)
+                         n_vocab_add=n_vocab_add,
+                         use_cudnn=args['use_cudnn'])
+    my_cudnn(args['use_cudnn'])
 
     if args.get('word_emb_file', False):
 

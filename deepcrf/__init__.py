@@ -54,6 +54,7 @@ def cli():
               help='delimiter string')
 @click.option('--save_name', type=str, default='',
               help='save_name')
+@click.option('--use_cudnn', type=int, default=1, help='use_cudnn = 0 or 1')
 def train(train_file, **args):
     # load input_file
     main.run(train_file, is_train=True, **args)
@@ -104,6 +105,7 @@ def train(train_file, **args):
 @click.option('--model_filename', type=click.Path())
 @click.option('--input_idx', type=str, default='0', help='input_idx for features.')
 @click.option('--output_idx', type=str, default='-1', help='output_idx for predicting.')
+@click.option('--use_cudnn', type=int, default=1, help='use_cudnn = 0 or 1')
 def predict(input_file, **args):
     main.run(input_file, is_train=False, **args)
 

@@ -13,6 +13,9 @@ import numpy as np
 from util import UNKWORD, PADDING, BOS
 
 
+from util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
+
+
 class BaseCNNEncoder(chainer.Chain):
 
     def __init__(self, emb_dim=100, window_size=3, init_emb=None,
@@ -47,6 +50,7 @@ class BaseCNNEncoder(chainer.Chain):
 
     def set_train(self, train):
         self.train = train
+        my_set_train(train)
 
     def make_batch(self, data):
         """
@@ -97,7 +101,7 @@ class BaseCNNEncoder(chainer.Chain):
 
     def compute_vecs(self, word_ids, word_boundaries, phrase_num,
                      char_vecs=None):
-        word_ids = Variable(word_ids, volatile=not self.train)
+        word_ids = my_variable(word_ids, volatile=not self.train)
         word_embs = self.emb(word_ids)     # total_len x dim
         word_embs_reshape = F.reshape(word_embs, (1, 1, -1, self.emb_dim))
 

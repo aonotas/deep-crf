@@ -23,13 +23,8 @@ import six
 
 to_cpu = chainer.cuda.to_cpu
 
-
-def my_variable(x, volatile):
-    return Variable(x, volatile=volatile)
-
-
-def my_dropout(x, ratio, train):
-    return F.dropout(x, ratio=ratio, train=train)
+version = chainer.__version__
+from util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
 
 
 class BiLSTM_CNN_CRF(chainer.Chain):
@@ -38,6 +33,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
                  hidden_dim=200, init_emb=None, use_dropout=0.33, n_layers=1,
                  n_label=0, use_crf=True, use_bi=True, char_input_dim=100,
                  char_hidden_dim=100, rnn_name='bilstm', demo=False,
+                 use_cudnn=True,
                  n_add_feature_dim=0, n_add_feature=0, n_vocab_add=[]):
         # feature_dim = emb_dim + add_dim + pos_dim
         n_dir = 2 if use_bi else 1
@@ -61,8 +57,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
 
         super(BiLSTM_CNN_CRF, self).__init__(
             word_embed=L.EmbedID(n_vocab, emb_dim, ignore_label=-1),
-            rnn=rnn_link(n_layers=n_layers, in_size=feature_dim,
-                         out_size=hidden_dim, dropout=use_dropout),
+            rnn=my_rnn_link(rnn_link, n_layers, feature_dim, hidden_dim, use_dropout, use_cudnn),
             output_layer=L.Linear(hidden_dim * n_dir, n_label),
         )
         if init_emb is not None:
@@ -114,6 +109,8 @@ class BiLSTM_CNN_CRF(chainer.Chain):
 
         if self.use_char:
             self.char_cnn.set_train(train)
+
+        my_set_train(train)
 
     def predict(self, y_list, t, compute_loss=True):
 
