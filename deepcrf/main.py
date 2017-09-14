@@ -252,7 +252,8 @@ def run(data_file, is_train=False, **args):
 
         elif word_emb_vocab_type == 'additional':
             assert_word_emb_shape(word_vecs.shape[1], net.word_embed.W.shape[1])
-            net.word_embed.W.data = np.concatenate([net.word_embed.W.data, additional_vecs], axis=0)
+            v_size = additional_vecs.shape[0]
+            net.word_embed.W.data[v_size:] = additional_vecs[:]
 
     if args.get('return_model', False):
         return net
