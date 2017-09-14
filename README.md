@@ -57,9 +57,27 @@ $ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_
 ```
 (Now only support Glove vecotr format. I will support word2vec format.)
 
+We prepare some vocab mode.
+- `--word_emb_vocab_type`: select from [replace_all, replace_only, additional]
+-- `replace_all` : Replace training vocab by Glove embeddings's vocab.
+-- `replace_only` : Replace word embedding exists in training vocab.
+-- `additional` : Concatenate training vocab and Glove embeddings's vocab.
+
+If you want to use word2vec embeddings, please convert Glove format.
+```
+$ head glove.6B.100d.txt
+the -0.038194 -0.24487 0.72812 -0.39961 0.083172
+dog -0.10767 0.11053 0.59812 -0.54361 0.67396
+cat -0.33979 0.20941 0.46348 -0.64792 -0.38377
+of -0.1529 -0.24279 0.89837 0.16996 0.53516
+to -0.1897 0.050024 0.19084 -0.049184 -0.089737
+and -0.071953 0.23127 0.023731 -0.50638 0.33923
+in 0.085703 -0.22201 0.16569 0.13373 0.38239
+```
+
 ### Additional Feature Support
 ```
-$ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-crf −−input idx 0,1 −−output idx 2
+$ deep-crf train input_file_multi.txt −−input_idx 0,1 −−output_idx 2 --delimiter ' ' --model_name bilstm-cnn-crf 
 ```
 
 ```
@@ -79,8 +97,11 @@ a       DT  O
 man     NN  O 
 .       .   O
 ```
+Note that `--input_idx` means that input features (but word feature must be 0-index) like this example.
+
 
 ### Multi-Task Learning Support
+(Now developing this multi-task learning mode...)
 ```
 $ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-crf −−input idx 0 −−output idx 1,2
 ```
