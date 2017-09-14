@@ -12,8 +12,12 @@ cd deep-crf
 python setup.py install
 ```
 
-Note that Chainer version is `1.2.40`
+Now support both Chainer v2.1.0 and v1.24.0!
 ```
+# if you want to use v2
+pip install 'chainer==2.1.0'
+
+# if you want to use v1
 pip install 'chainer==1.24.0'
 ```
 
@@ -137,6 +141,11 @@ cd deep-crf
 git pull
 python setup.py install
 ```
+
+# If you got CUDNN ERROR
+if you got CUDNN ERROR, please let me know in issues.
+
+You can cudnn-off mode with `--use_cudnn=0`
 
 ## Features
 DeepCRF provides following features.
