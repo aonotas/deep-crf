@@ -62,9 +62,9 @@ $ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_
 
 We prepare some vocab mode.
 - `--word_emb_vocab_type`: select from [replace_all, replace_only, additional]
--- `replace_all` : Replace training vocab by Glove embeddings's vocab.
--- `replace_only` : Replace word embedding exists in training vocab.
--- `additional` : Concatenate training vocab and Glove embeddings's vocab.
+- `replace_all` : Replace training vocab by Glove embeddings's vocab.
+- `replace_only` : Replace word embedding exists in training vocab.
+- `additional` : Concatenate training vocab and Glove embeddings's vocab.
 
 If you want to use word2vec embeddings, please convert Glove format.
 ```
