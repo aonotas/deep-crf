@@ -132,7 +132,7 @@ def run(data_file, is_train=False, **args):
             additional_vecs = []
             for word, word_idx in sorted(vocab_glove.items(), key=lambda x: x[1]):
                 if word not in vocab:
-                    vocab[word] = len(word)
+                    vocab[word] = len(vocab)
                     additional_vecs.append(word_vecs[word_idx])
             additional_vecs = np.array(additional_vecs, dtype=np.float32)
 
