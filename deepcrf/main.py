@@ -238,6 +238,7 @@ def run(data_file, is_train=False, **args):
         if word_emb_vocab_type == 'replace_all':
             # replace all vocab by Pre-trained embeddings
             assert_word_emb_shape(word_vecs.shape[1], net.word_embed.W.shape[1])
+            net.word_embed.W.data = word_vecs[:]
         elif word_emb_vocab_type == 'replace_only':
             assert_no_emb(word_vecs)
             assert_word_emb_shape(word_vecs.shape[1], net.word_embed.W.shape[1])
