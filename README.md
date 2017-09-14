@@ -24,7 +24,7 @@ $ mkdir save_model_dir
 $ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf
 ```
 ```
-$ cat input_file_multi.txt
+$ cat input_file.txt
 Barack  B−PERSON 
 Hussein I−PERSON 
 Obama   E−PERSON
@@ -32,12 +32,36 @@ is      O
 a       O 
 man     O 
 .       O
+
+Yuji   B−PERSON 
+Matsumoto E−PERSON 
+is     O 
+a      O 
+man    O 
+.      O
 ```
+Each line is `word` and `gold tag`.
+One line is represented by `word` `[ ](space)` `gold tag`.
+Note that you should put `empty line (\n)` between sentences.
+This format is called CoNLL format.
+
 
 ### Deep BiLSTM-CNN-CRF model (three layers)
 ```
 $ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_layer 3
 ```
+
+### Set Pretrained Word Embeddings 
+```
+$ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_layer 3 --word_emb_file ./glove.6B.100d.txt
+```
+(Now only support Glove vecotr format. I will support word2vec format.)
+
+### Additional Feature Support
+```
+$ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-crf −−input idx 0,1 −−output idx 2
+```
+
 ```
 $ cat input_file_multi.txt
 Barack  NN B−PERSON 
@@ -47,10 +71,13 @@ is      VBZ O
 a       DT  O 
 man     NN  O 
 .       .   O
-```
-### Additional Feature Support
-```
-$ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-crf −−input idx 0,1 −−output idx 2
+
+Yuji  NN B−PERSON 
+Matsumoto NN E−PERSON 
+is      VBZ O 
+a       DT  O 
+man     NN  O 
+.       .   O
 ```
 
 ### Multi-Task Learning Support
@@ -61,6 +88,13 @@ $ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-cr
 ## How to predict?
 ```
 $ deep-crf predict input_raw_file.txt --model_name bilstm-cnn-crf --model_filename bilstm-cnn-crf_adam_epoch10.model --predicted_output predicted.txt
+```
+
+Please use following format when `predict`.
+```
+$ cat input_raw_file.txt
+Barack Hussein Obama is a man .
+Yuji Matsumoto is a man .
 ```
 
 ## How to evaluate?
