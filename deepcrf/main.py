@@ -93,7 +93,7 @@ def run(data_file, is_train=False, **args):
     # TODO: check unkown pos tags
     # TODO: compute unk words
     if is_train:
-        sentences_words_train = [w_obj[0] for w_obj in sentences_train]
+        sentences_words_train = [[w_obj[0] for w_obj in sentence] for sentence in sentences_train]
         vocab = util.build_vocab(sentences_words_train)
         vocab_char = util.build_vocab(util.flatten(sentences_words_train))
         vocab_tags = util.build_tag_vocab(sentences_train)
