@@ -24,6 +24,14 @@ import six
 to_cpu = chainer.cuda.to_cpu
 
 
+def my_variable(x, volatile):
+    return Variable(x, volatile=volatile)
+
+
+def my_dropout(x, ratio, train):
+    return F.dropout(x, ratio=ratio, train=train)
+
+
 class BiLSTM_CNN_CRF(chainer.Chain):
 
     def __init__(self, n_vocab=None, n_char_vocab=None, emb_dim=100,
@@ -168,7 +176,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
 
         xs = []
         for i, x in enumerate(x_data):
-            x = Variable(x)
+            x = my_variable(x, volatile=not self.train)
             x = self.word_embed(x)
 
             if self.use_char:
@@ -178,19 +186,19 @@ class BiLSTM_CNN_CRF(chainer.Chain):
             if x_additional:
                 for add_i in six.moves.range(self.n_add_feature):
                     x_add = x_additional[add_i][i]
-                    x_add = Variable(x_add)
+                    x_add = my_variable(x_add, volatile=not self.train)
                     add_emb_layer = self.get_layer('add_embed_' + str(add_i))
                     x_add = add_emb_layer(x_add)
                     x = F.concat([x, x_add], axis=1)
 
-            x = F.dropout(x, ratio=self.use_dropout)
+            x = my_dropout(x, ratio=self.use_dropout, train=self.train)
             xs.append(x)
 
         _hy_f, _cy_f, h_vecs = self.rnn(hx=hx, cx=cx, xs=xs,)
 
         h_vecs = F.concat(h_vecs, axis=0)
         if self.use_dropout:
-            h_vecs = F.dropout(h_vecs, ratio=self.use_dropout)
+            h_vecs = my_dropout(h_vecs, ratio=self.use_dropout, train=self.train)
 
         # Label Predict
         output = self.output_layer(h_vecs)
