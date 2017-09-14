@@ -55,7 +55,6 @@ $ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_
 ```
 $ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_layer 3 --word_emb_file ./glove.6B.100d.txt
 ```
-(Now only support Glove vecotr format. I will support word2vec format.)
 
 We prepare some vocab mode.
 - `--word_emb_vocab_type`: select from [replace_all, replace_only, additional]
