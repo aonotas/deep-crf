@@ -65,6 +65,7 @@ def read_raw_file(filename, delimiter=u' '):
     sentences = []
     for l in open(filename):
         words = l.decode('utf-8').strip().split(delimiter)
+        words = [_.strip() for _ in words]
         if len(words) and len(words[0]):
             words = [(w, -1) for w in words]
             sentences.append(words)
@@ -77,6 +78,7 @@ def read_conll_file(filename, delimiter=u'\t', input_idx=0, output_idx=-1):
     n_features = -1
     for line_idx, l in enumerate(open(filename, 'r')):
         l_split = l.strip().decode('utf-8').split(delimiter)
+        l_split = [_.strip() for _ in l_split]
         if len(l_split) <= 1:
             if len(sentence) > 0:
                 sentences.append(sentence)
