@@ -81,6 +81,8 @@ def train(train_file, **args):
 @click.option('--gpu', type=int, default=-1,
               help='gpu ID. when gpu=-1 use CPU mode.')
 @click.option('--word_emb_file', type=click.Path())
+@click.option('--word_emb_vocab_type', type=str, default='replace_all',
+              help="select from [replace_all, replace_only, additional]")
 @click.option('--dev_file', type=click.Path())
 @click.option('--test_file', type=click.Path())
 @click.option('--vocab_file', type=click.Path())

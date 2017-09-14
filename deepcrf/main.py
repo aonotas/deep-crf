@@ -206,13 +206,44 @@ def run(data_file, is_train=False, **args):
                          char_hidden_dim=args['n_char_hidden'],
                          n_label=len(vocab_tags))
 
-    if args['word_emb_file']:
+    if args.get('word_emb_file', False):
         # set Pre-trained embeddings
         # emb_file = './emb/glove.6B.100d.txt'
         emb_file = args['word_emb_file']
-        # word_vecs, vocab_glove = util.load_glove_embedding_include_vocab(emb_file)
-        word_ids, word_vecs = util.load_glove_embedding(emb_file, vocab)
-        net.word_embed.W.data[word_ids] = word_vecs[:]
+        word_emb_vocab_type = args.get('word_emb_vocab_type')
+
+        def assert_word_emb_shape(shape1, shape2):
+            err_msg = '''Pre-trained embedding size is not equal to `--n_word_emb` ({} != {})'''
+            if shape1 != shape2:
+                err_msg = err_msg.format(str(shape1), str(shape2))
+                raise ValueError(err_msg)
+
+        def assert_no_emb(word_vecs):
+            err_msg = '''There is no-embeddings! Please check your file `--word_emb_file`'''
+            if word_vecs.shape[0] == 0:
+                raise ValueError(err_msg)
+
+        if word_emb_vocab_type == 'replace_all':
+            # replace all vocab by Pre-trained embeddings
+            word_vecs, vocab_glove = util.load_glove_embedding_include_vocab(emb_file)
+            assert_word_emb_shape(word_vecs.shape[1], net.word_embed.W.shape[1])
+            net.word_embed.W.data[:] = word_vecs[:]
+            vocab = vocab_glove
+        elif word_emb_vocab_type == 'replace_only':
+            word_ids, word_vecs = util.load_glove_embedding(emb_file, vocab)
+            assert_no_emb(word_vecs)
+            assert_word_emb_shape(word_vecs.shape[1], net.word_embed.W.shape[1])
+            net.word_embed.W.data[word_ids] = word_vecs[:]
+
+        elif word_emb_vocab_type == 'additional':
+            word_vecs, vocab_glove = util.load_glove_embedding_include_vocab(emb_file)
+            assert_word_emb_shape(word_vecs.shape[1], net.word_embed.W.shape[1])
+
+            for word, word_idx in sorted(vocab_glove.items(), key=lambda x: x[1]):
+                if word not in vocab:
+                    vocab[word] = len(word)
+
+            net.word_embed.W.data = word_vecs[:]
 
     if args.get('return_model', False):
         return net
