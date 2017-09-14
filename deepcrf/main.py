@@ -102,6 +102,34 @@ def run(data_file, is_train=False, **args):
         vocab_char = util.load_vocab(save_vocab_char)
         vocab_tags = util.load_vocab(save_tags_vocab)
 
+    if args.get('word_emb_file', False):
+        # set Pre-trained embeddings
+        # emb_file = './emb/glove.6B.100d.txt'
+        emb_file = args['word_emb_file']
+        word_emb_vocab_type = args.get('word_emb_vocab_type')
+
+        def assert_word_emb_shape(shape1, shape2):
+            err_msg = '''Pre-trained embedding size is not equal to `--n_word_emb` ({} != {})'''
+            if shape1 != shape2:
+                err_msg = err_msg.format(str(shape1), str(shape2))
+                raise ValueError(err_msg)
+
+        def assert_no_emb(word_vecs):
+            err_msg = '''There is no-embeddings! Please check your file `--word_emb_file`'''
+            if word_vecs.shape[0] == 0:
+                raise ValueError(err_msg)
+
+        if word_emb_vocab_type == 'replace_all':
+            # replace all vocab by Pre-trained embeddings
+            word_vecs, vocab_glove = util.load_glove_embedding_include_vocab(emb_file)
+            vocab = vocab_glove
+        elif word_emb_vocab_type == 'replace_only':
+            word_ids, word_vecs = util.load_glove_embedding(emb_file, vocab)
+            assert_no_emb(word_vecs)
+
+        elif word_emb_vocab_type == 'additional':
+            word_vecs, vocab_glove = util.load_glove_embedding_include_vocab(emb_file)
+
     if args.get('vocab_file', False):
         vocab_file = args['vocab_file']
         vocab = util.load_vocab(vocab_file)
@@ -129,7 +157,6 @@ def run(data_file, is_train=False, **args):
         return util.parse_to_tag_ids(sentences, xp=xp, vocab=vocab_tags,
                                      UNK_IDX=-1, idx=-1)
 
-    # if is_train:
     x_train = parse_to_word_ids(sentences_train)
     x_char_train = parse_to_char_ids(sentences_train)
     y_train = parse_to_tag_ids(sentences_train)
@@ -207,36 +234,16 @@ def run(data_file, is_train=False, **args):
                          n_label=len(vocab_tags))
 
     if args.get('word_emb_file', False):
-        # set Pre-trained embeddings
-        # emb_file = './emb/glove.6B.100d.txt'
-        emb_file = args['word_emb_file']
-        word_emb_vocab_type = args.get('word_emb_vocab_type')
-
-        def assert_word_emb_shape(shape1, shape2):
-            err_msg = '''Pre-trained embedding size is not equal to `--n_word_emb` ({} != {})'''
-            if shape1 != shape2:
-                err_msg = err_msg.format(str(shape1), str(shape2))
-                raise ValueError(err_msg)
-
-        def assert_no_emb(word_vecs):
-            err_msg = '''There is no-embeddings! Please check your file `--word_emb_file`'''
-            if word_vecs.shape[0] == 0:
-                raise ValueError(err_msg)
 
         if word_emb_vocab_type == 'replace_all':
             # replace all vocab by Pre-trained embeddings
-            word_vecs, vocab_glove = util.load_glove_embedding_include_vocab(emb_file)
             assert_word_emb_shape(word_vecs.shape[1], net.word_embed.W.shape[1])
-            net.word_embed.W.data = word_vecs[:]
-            vocab = vocab_glove
         elif word_emb_vocab_type == 'replace_only':
-            word_ids, word_vecs = util.load_glove_embedding(emb_file, vocab)
             assert_no_emb(word_vecs)
             assert_word_emb_shape(word_vecs.shape[1], net.word_embed.W.shape[1])
             net.word_embed.W.data[word_ids] = word_vecs[:]
 
         elif word_emb_vocab_type == 'additional':
-            word_vecs, vocab_glove = util.load_glove_embedding_include_vocab(emb_file)
             assert_word_emb_shape(word_vecs.shape[1], net.word_embed.W.shape[1])
 
             additional_vecs = []
@@ -246,7 +253,7 @@ def run(data_file, is_train=False, **args):
                     additional_vecs.append(word_vecs[word_idx])
             additional_vecs = np.array(additional_vecs, dtype=np.float32)
 
-            net.word_embed.W.data = np.concatenate([word_vecs, additional_vecs], axis=0)
+            net.word_embed.W.data = np.concatenate([net.word_embed.W.data, additional_vecs], axis=0)
 
     if args.get('return_model', False):
         return net
