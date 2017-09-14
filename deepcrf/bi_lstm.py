@@ -29,11 +29,13 @@ class BiLSTM_CNN_CRF(chainer.Chain):
     def __init__(self, n_vocab=None, n_char_vocab=None, emb_dim=100,
                  hidden_dim=200, init_emb=None, use_dropout=0.33, n_layers=1,
                  n_label=0, use_crf=True, use_bi=True, char_input_dim=100,
-                 char_hidden_dim=100, rnn_name='bilstm'):
+                 char_hidden_dim=100, rnn_name='bilstm', demo=False,
+                 n_add_feature_dim=0, n_add_feature=0, n_vocab_add=[]):
         # feature_dim = emb_dim + add_dim + pos_dim
         n_dir = 2 if use_bi else 1
-        feature_dim = emb_dim
-
+        feature_dim = emb_dim + n_add_feature_dim * n_add_feature
+        self.n_add_feature_dim = n_add_feature_dim
+        self.n_add_feature = n_add_feature
         use_char = False
         if n_char_vocab is not None:
             use_char = True
@@ -52,8 +54,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
         super(BiLSTM_CNN_CRF, self).__init__(
             word_embed=L.EmbedID(n_vocab, emb_dim, ignore_label=-1),
             rnn=rnn_link(n_layers=n_layers, in_size=feature_dim,
-                         out_size=hidden_dim, dropout=use_dropout,
-                         use_cudnn=True),
+                         out_size=hidden_dim, dropout=use_dropout),
             output_layer=L.Linear(hidden_dim * n_dir, n_label),
         )
         if init_emb is not None:
@@ -67,12 +68,22 @@ class BiLSTM_CNN_CRF(chainer.Chain):
                                       PAD_IDX=0)
             self.add_link('char_cnn', char_cnn)
 
+        if self.n_add_feature:
+            for i in six.moves.range(self.n_add_feature):
+                n_add_vocab = n_vocab_add[i]
+                add_embed = L.EmbedID(n_add_vocab, n_add_feature_dim, ignore_label=-1)
+                self.add_link('add_embed_' + str(i), add_embed)
+
         # if n_pos:
         #     pos_embed = L.EmbedID(n_pos, pos_dim, ignore_label=-1)
         #     self.add_link('pos_embed', pos_embed)
 
         if use_crf:
-            self.add_link('lossfun', L.CRF1d(n_label=n_label))
+            if demo:
+                import my_crf
+                self.add_link('lossfun', my_crf.CRF1d(n_label=n_label))
+            else:
+                self.add_link('lossfun', L.CRF1d(n_label=n_label))
 
         # self.n_pos = n_pos
         self.hidden_dim = hidden_dim
@@ -86,6 +97,9 @@ class BiLSTM_CNN_CRF(chainer.Chain):
         for w in self.rnn:
             w.b1.data[:] = 1.0
             w.b5.data[:] = 1.0
+
+    def get_layer(self, name):
+        return self.__getitem__(name)
 
     def set_train(self, train):
         self.train = train
@@ -114,14 +128,13 @@ class BiLSTM_CNN_CRF(chainer.Chain):
         hs = F.transpose_sequence(hs)
 
         loss = None
-        if compute_loss:
+        if compute_loss and ts_original is not None:
             # loss
             ts = F.transpose_sequence(ts_original)
             loss = self.lossfun(hs, ts)
 
         # predict
-        _, predicts_trans = self.lossfun.argmax(hs)
-
+        score, predicts_trans = self.lossfun.argmax(hs)
         predicts = F.transpose_sequence(predicts_trans)
         gold_predict_pairs = []
         if compute_loss:
@@ -139,7 +152,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
 
         return gold_predict_pairs, loss
 
-    def __call__(self, x_data, x_char_data=None, add_x=None):
+    def __call__(self, x_data, x_char_data=None, x_additional=None):
         hx = None
         cx = None
         self.n_length = [len(_x) for _x in x_data]
@@ -155,23 +168,29 @@ class BiLSTM_CNN_CRF(chainer.Chain):
 
         xs = []
         for i, x in enumerate(x_data):
-            x = Variable(x, volatile=not self.train)
+            x = Variable(x)
             x = self.word_embed(x)
 
             if self.use_char:
                 x_char = F.embed_id(char_index[i], char_vecs, ignore_label=-1)
                 x = F.concat([x, x_char], axis=1)
 
-            x = F.dropout(x, ratio=self.use_dropout, train=self.train)
+            if x_additional:
+                for add_i in six.moves.range(self.n_add_feature):
+                    x_add = x_additional[add_i][i]
+                    x_add = Variable(x_add)
+                    add_emb_layer = self.get_layer('add_embed_' + str(add_i))
+                    x_add = add_emb_layer(x_add)
+                    x = F.concat([x, x_add], axis=1)
+
+            x = F.dropout(x, ratio=self.use_dropout)
             xs.append(x)
 
-        _hy_f, _cy_f, h_vecs = self.rnn(hx=hx, cx=cx, xs=xs,
-                                        train=self.train)
+        _hy_f, _cy_f, h_vecs = self.rnn(hx=hx, cx=cx, xs=xs,)
 
         h_vecs = F.concat(h_vecs, axis=0)
         if self.use_dropout:
-            h_vecs = F.dropout(h_vecs, ratio=self.use_dropout,
-                               train=self.train)
+            h_vecs = F.dropout(h_vecs, ratio=self.use_dropout)
 
         # Label Predict
         output = self.output_layer(h_vecs)

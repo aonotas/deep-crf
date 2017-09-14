@@ -31,6 +31,8 @@ def cli():
               help='min count of vocab.')
 @click.option('--n_word_emb', type=int, default=100,
               help='word embedding size.')
+@click.option('--n_add_feature_emb', type=int, default=100,
+              help='additional feature embedding size.')
 @click.option('--n_char_emb', type=int, default=30,
               help='character embedding size.')
 @click.option('--n_char_hidden', type=int, default=30,
@@ -46,6 +48,8 @@ def cli():
 @click.option('--dev_file', type=click.Path())
 @click.option('--test_file', type=click.Path())
 @click.option('--model_filename', type=click.Path())
+@click.option('--input_idx', type=str, default=0, help='input_idx for features.')
+@click.option('--output_idx', type=str, default=-1, help='output_idx for predicting.')
 @click.option('--delimiter', type=str, default='\t',
               help='delimiter string')
 @click.option('--save_name', type=str, default='',
@@ -75,6 +79,8 @@ def train(train_file, **args):
               help='min count of vocab.')
 @click.option('--n_word_emb', type=int, default=100,
               help='word embedding size.')
+@click.option('--n_add_feature_emb', type=int, default=100,
+              help='additional feature embedding size.')
 @click.option('--n_char_emb', type=int, default=30,
               help='character embedding size.')
 @click.option('--n_char_hidden', type=int, default=30,
@@ -96,6 +102,8 @@ def train(train_file, **args):
 @click.option('--predicted_output', type=str, default='',
               help='predicted_output')
 @click.option('--model_filename', type=click.Path())
+@click.option('--input_idx', type=str, default=0, help='input_idx for features.')
+@click.option('--output_idx', type=str, default=-1, help='output_idx for predicting.')
 def predict(input_file, **args):
     main.run(input_file, is_train=False, **args)
 

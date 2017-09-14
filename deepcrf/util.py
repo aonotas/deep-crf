@@ -149,6 +149,7 @@ def eval_accuracy(predict_lists):
 
     sum_cnt = 1 if sum_cnt == 0 else sum_cnt
     accuracy = float(correct_cnt) / sum_cnt
+    accuracy = accuracy * 100.0
     return accuracy
 
 
