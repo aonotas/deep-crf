@@ -406,7 +406,7 @@ def run(data_file, is_train=False, **args):
             if efficient_gpu:
                 x = [to_gpu(_) for _ in x]
                 x_char = [[to_gpu(_) for _ in words] for words in x_char]
-                target_y = to_gpu(target_y)
+                target_y = [to_gpu(_) for _ in target_y]
 
             output = net(x_data=x, x_char_data=x_char, x_additional=x_additional)
             predict, loss = net.predict(output, target_y)
