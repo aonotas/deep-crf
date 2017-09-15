@@ -12,16 +12,16 @@ def cli():
 
 
 @cli.command()
-@click.argument('train_file', type=click.Path(exists=True))
+@click.argument('train_file', type=click.Path(exists=True), help='trained file path')
 @click.option('--save_dir', type=str, default='save_model_dir',
-              help='trained model save dir')
+              help='save model  dir')
 @click.option('--model_name', type=str, default='bilstm-cnn-crf',
               help="select from [bilstm-cnn-crf, bilstm-cnn]")
-@click.option('--batchsize', type=int, default=32)
-@click.option('--max_iter', type=int, default=100)
+@click.option('--batchsize', type=int, default=32, help='batch size')
+@click.option('--max_iter', type=int, default=50, help='max iterations (default: 50)')
 @click.option('--optimizer', type=str, default='adam',
               help="select from [adam, adadelta, sgd, sgd_mom]")
-@click.option('--init_lr', type=float, default=0.01)
+@click.option('--init_lr', type=float, default=0.001, help='Initial Learning rate (default: 0.001)')
 @click.option('--weight_decay', type=float, default=0.0)
 @click.option('--use_lr_decay', type=int, default=0)
 @click.option('--use_crf', type=int, default=1, help='use CRF flag.')
@@ -64,14 +64,14 @@ def train(train_file, **args):
 @cli.command()
 @click.argument('input_file', type=click.Path(exists=True))
 @click.option('--save_dir', type=str, default='save_model_dir',
-              help='trained model save dir')
+              help='save model  dir')
 @click.option('--model_name', type=str, default='bilstm-cnn-crf',
               help="select from [bilstm-cnn-crf, bilstm-cnn]")
-@click.option('--batchsize', type=int, default=32)
-@click.option('--max_iter', type=int, default=100)
+@click.option('--batchsize', type=int, default=32, help='batch size')
+@click.option('--max_iter', type=int, default=50, help='max iterations (default: 50)')
 @click.option('--optimizer', type=str, default='adam',
               help="select from [adam, adadelta, sgd, sgd_mom]")
-@click.option('--init_lr', type=float, default=0.01)
+@click.option('--init_lr', type=float, default=0.001, help='Initial Learning rate (default: 0.001)')
 @click.option('--weight_decay', type=float, default=0.0)
 @click.option('--use_lr_decay', type=int, default=0)
 @click.option('--use_crf', type=int, default=1, help='use CRF flag.')
