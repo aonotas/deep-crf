@@ -12,8 +12,12 @@ cd deep-crf
 python setup.py install
 ```
 
-Note that Chainer version is `1.2.40`
+Now support both Chainer v2.1.0 and v1.24.0!
 ```
+# if you want to use v2
+pip install 'chainer==2.1.0'
+
+# if you want to use v1
 pip install 'chainer==1.24.0'
 ```
 
@@ -58,9 +62,9 @@ $ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_
 
 We prepare some vocab mode.
 - `--word_emb_vocab_type`: select from [replace_all, replace_only, additional]
--- `replace_all` : Replace training vocab by Glove embeddings's vocab.
--- `replace_only` : Replace word embedding exists in training vocab.
--- `additional` : Concatenate training vocab and Glove embeddings's vocab.
+- `replace_all` : Replace training vocab by Glove embeddings's vocab.
+- `replace_only` : Replace word embedding exists in training vocab.
+- `additional` : Concatenate training vocab and Glove embeddings's vocab.
 
 If you want to use word2vec embeddings, please convert Glove format.
 ```
@@ -137,6 +141,11 @@ cd deep-crf
 git pull
 python setup.py install
 ```
+
+# If you got CUDNN ERROR
+if you got CUDNN ERROR, please let me know in issues.
+
+You can cudnn-off mode with `--use_cudnn=0`
 
 ## Features
 DeepCRF provides following features.
