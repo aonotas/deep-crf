@@ -12,7 +12,7 @@ def cli():
 
 
 @cli.command()
-@click.argument('train_file', type=click.Path(exists=True), help='trained file path')
+@click.argument('train_file', type=click.Path(exists=True))
 @click.option('--save_dir', type=str, default='save_model_dir',
               help='save model  dir')
 @click.option('--model_name', type=str, default='bilstm-cnn-crf',
