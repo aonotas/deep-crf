@@ -325,9 +325,14 @@ def run(data_file, is_train=False, **args):
             x_char = x_char_data[index:index + batchsize]
             target_y = y_data[index:index + batchsize]
 
+            if efficient_gpu:
+                x = [to_gpu(_) for _ in x]
+                x_char = [[to_gpu(_) for _ in words] for words in x_char]
+                target_y = [to_gpu(_) for _ in target_y]
+
             x_additional = []
             if len(x_train_additionals):
-                x_additional = [[x_ad[add_i] for add_i in perm[index:index + batchsize]]
+                x_additional = [[to_gpu(x_ad[add_i]) for add_i in perm[index:index + batchsize]]
                                 for x_ad in x_train_additionals]
 
             output = net(x_data=x, x_char_data=x_char, x_additional=x_additional)
