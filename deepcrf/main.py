@@ -23,6 +23,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 to_cpu = chainer.cuda.to_cpu
+
 import os.path
 
 version = chainer.__version__
@@ -63,9 +64,16 @@ def run(data_file, is_train=False, **args):
     save_name = save_dir + save_name
 
     xp = cuda.cupy if args['gpu'] >= 0 else np
+    efficient_gpu = False
     if args['gpu'] >= 0:
         cuda.get_device(args['gpu']).use()
         xp.random.seed(1234)
+        efficient_gpu = args.get('efficient_gpu', False)
+
+    def to_gpu(x):
+        if args['gpu'] >= 0:
+            return chainer.cuda.to_gpu(x)
+        return x
 
     # load files
     dev_file = args['dev_file']
@@ -172,16 +180,20 @@ def run(data_file, is_train=False, **args):
     CHAR_PAD_IDX = vocab_char[PADDING]
     CHAR_UNK_IDX = vocab_char[UNKWORD]
 
+    tmp_xp = xp
+    if efficient_gpu:
+        tmp_xp = np  # use CPU (numpy)
+
     def parse_to_word_ids(sentences, word_input_idx, vocab):
-        return util.parse_to_word_ids(sentences, xp=xp, vocab=vocab,
+        return util.parse_to_word_ids(sentences, xp=tmp_xp, vocab=vocab,
                                       UNK_IDX=UNK_IDX, idx=word_input_idx)
 
     def parse_to_char_ids(sentences):
-        return util.parse_to_char_ids(sentences, xp=xp, vocab_char=vocab_char,
+        return util.parse_to_char_ids(sentences, xp=tmp_xp, vocab_char=vocab_char,
                                       UNK_IDX=CHAR_UNK_IDX, idx=word_input_idx)
 
     def parse_to_tag_ids(sentences):
-        return util.parse_to_tag_ids(sentences, xp=xp, vocab=vocab_tags,
+        return util.parse_to_tag_ids(sentences, xp=tmp_xp, vocab=vocab_tags,
                                      UNK_IDX=-1, idx=-1)
 
     x_train = parse_to_word_ids(sentences_train, word_input_idx, vocab)
@@ -198,8 +210,6 @@ def run(data_file, is_train=False, **args):
 
     y_dev_cpu = [[w[-1] for w in sentence]
                  for sentence in sentences_dev]
-    # y_dev_cpu = util.parse_to_tag_ids(sentences_dev, xp=np, vocab=vocab_tags,
-    #                                   UNK_IDX=-1, idx=-1)
     # tag_names = []
     tag_names = list(set([tag[2:] if len(tag) >= 2 else tag[0] for tag in vocab_tags.keys()]))
 
@@ -209,11 +219,11 @@ def run(data_file, is_train=False, **args):
     x_test_additionals = [parse_to_word_ids(sentences_test, ad_feat_id, vocab_adds[i])
                           for i, ad_feat_id in enumerate(additional_input_idx)]
 
-    cnt_train_unk = sum([xp.sum(d == UNK_IDX) for d in x_train])
+    cnt_train_unk = sum([tmp_xp.sum(d == UNK_IDX) for d in x_train])
     cnt_train_word = sum([d.size for d in x_train])
     unk_train_unk_rate = float(cnt_train_unk) / cnt_train_word
 
-    cnt_dev_unk = sum([xp.sum(d == UNK_IDX) for d in x_dev])
+    cnt_dev_unk = sum([tmp_xp.sum(d == UNK_IDX) for d in x_dev])
     cnt_dev_word = sum([d.size for d in x_dev])
     unk_dev_unk_rate = float(cnt_dev_unk) / max(cnt_dev_word, 1)
 
@@ -390,8 +400,14 @@ def run(data_file, is_train=False, **args):
 
             x_additional = []
             if len(x_train_additionals):
-                x_additional = [[x_ad[add_i] for add_i in perm[index:index + batchsize]]
+                x_additional = [[to_gpu(x_ad[add_i]) for add_i in perm[index:index + batchsize]]
                                 for x_ad in x_train_additionals]
+
+            if efficient_gpu:
+                x = [to_gpu(_) for _ in x]
+                x_char = [[to_gpu(_) for _ in words] for words in x_char]
+                target_y = to_gpu(target_y)
+
             output = net(x_data=x, x_char_data=x_char, x_additional=x_additional)
             predict, loss = net.predict(output, target_y)
 
