@@ -142,7 +142,12 @@ git pull
 python setup.py install
 ```
 
-# If you got CUDNN ERROR
+## Help (how to use)
+```
+deep-crf train --help
+```
+
+## If CUDNN ERROR
 if you got CUDNN ERROR, please let me know in issues.
 
 You can cudnn-off mode with `--use_cudnn=0`
