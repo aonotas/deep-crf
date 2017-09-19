@@ -25,7 +25,7 @@ pip install 'chainer==1.24.0'
 ### train [Ma and Hovy (2016)](https://arxiv.org/abs/1603.01354) model
 ```
 $ mkdir save_model_dir
-$ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf
+$ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --dev_file input_file_dev.txt
 ```
 ```
 $ cat input_file.txt
@@ -52,12 +52,12 @@ This format is called CoNLL format.
 
 ### Deep BiLSTM-CNN-CRF model (three layers)
 ```
-$ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_layer 3
+$ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_layer 3  --dev_file input_file_dev.txt
 ```
 
 ### Set Pretrained Word Embeddings 
 ```
-$ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_layer 3 --word_emb_file ./glove.6B.100d.txt
+$ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_layer 3 --word_emb_file ./glove.6B.100d.txt  --dev_file input_file_dev.txt
 ```
 
 We prepare some vocab mode.
@@ -80,7 +80,7 @@ in 0.085703 -0.22201 0.16569 0.13373 0.38239
 
 ### Additional Feature Support
 ```
-$ deep-crf train input_file_multi.txt −−input_idx 0,1 −−output_idx 2 --delimiter ' ' --model_name bilstm-cnn-crf 
+$ deep-crf train input_file_multi.txt −−input_idx 0,1 −−output_idx 2 --delimiter ' ' --model_name bilstm-cnn-crf  --dev_file input_file_dev.txt
 ```
 
 ```
@@ -106,7 +106,7 @@ Note that `--input_idx` means that input features (but word feature must be 0-in
 ### Multi-Task Learning Support
 (Now developing this multi-task learning mode...)
 ```
-$ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-crf −−input idx 0 −−output idx 1,2
+$ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-crf −−input idx 0 −−output idx 1,2 
 ```
 
 ## How to predict?
@@ -142,7 +142,12 @@ git pull
 python setup.py install
 ```
 
-# If you got CUDNN ERROR
+## Help (how to use)
+```
+deep-crf train --help
+```
+
+## If CUDNN ERROR
 if you got CUDNN ERROR, please let me know in issues.
 
 You can cudnn-off mode with `--use_cudnn=0`
