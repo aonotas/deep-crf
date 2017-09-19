@@ -363,11 +363,13 @@ def run(data_file, is_train=False, **args):
         x_char_predict = x_char_train
         y_predict = y_train
 
-        # predict_dev, loss_dev, predict_dev_tags = eval_loop(x_dev, x_char_dev, y_dev)
-        gold_predict_pairs = [y_dev_cpu, predict_dev_tags]
-        result, phrase_info = util.conll_eval(gold_predict_pairs, flag=False, tag_class=tag_names)
-        all_result = result['All_Result']
-        print 'all_result:', all_result
+        if dev_file:
+            predict_dev, loss_dev, predict_dev_tags = eval_loop(x_dev, x_char_dev, y_dev)
+            gold_predict_pairs = [y_dev_cpu, predict_dev_tags]
+            result, phrase_info = util.conll_eval(
+                gold_predict_pairs, flag=False, tag_class=tag_names)
+            all_result = result['All_Result']
+            print 'all_result:', all_result
 
         predict_pairs, _, _tmp = eval_loop(x_predict, x_char_predict, y_predict)
         _, predict_tags = zip(*predict_pairs)
