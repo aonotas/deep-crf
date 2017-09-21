@@ -65,7 +65,7 @@ def read_raw_file(filename, delimiter=u' '):
     sentences = []
     for l in open(filename):
         words = l.decode('utf-8').strip().split(delimiter)
-        words = [_.strip() for _ in words]
+        words = [w.strip() for w in words if len(w.strip()) != 0]
         if len(words) and len(words[0]):
             words = [(w, -1) for w in words]
             sentences.append(words)
