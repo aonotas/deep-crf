@@ -332,7 +332,7 @@ def run(data_file, is_train=False, **args):
 
             x_additional = []
             if len(x_train_additionals):
-                x_additional = [[to_gpu(x_ad[add_i]) for add_i in perm[index:index + batchsize]]
+                x_additional = [[to_gpu(_) for _ in x_ad[index:index + batchsize]]
                                 for x_ad in x_train_additionals]
 
             output = net(x_data=x, x_char_data=x_char, x_additional=x_additional)
