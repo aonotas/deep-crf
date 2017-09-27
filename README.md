@@ -128,7 +128,7 @@ Please set same `--save_name` in training step.
 
 ## How to predict? (Additional Feature)
 ```
-$ deep-crf predict input_file_multi.txt --model_filename ./save_model_dir/bilstm-cnn-crf_multi_epoch3.model --save_name bilstm-cnn-crf_multi  --predicted_output predicted.txt
+$ deep-crf predict input_file_multi.txt −−input_idx 0,1 −−output_idx 2 --model_filename ./save_model_dir/bilstm-cnn-crf_multi_epoch3.model --save_name bilstm-cnn-crf_multi  --predicted_output predicted.txt
 ```
 Note that you must prepare CoNLL format input file when you use additional feature mode in training step.
 ```
