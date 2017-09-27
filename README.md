@@ -80,7 +80,7 @@ in 0.085703 -0.22201 0.16569 0.13373 0.38239
 
 ### Additional Feature Support
 ```
-$ deep-crf train input_file_multi.txt −−input_idx 0,1 −−output_idx 2 --dev_file input_file_dev.txt --save_name bilstm-cnn-crf_adam_additional --optimizer adam
+$ deep-crf train input_file_multi.txt --input_idx 0,1 --output_idx 2 --dev_file input_file_dev.txt --save_name bilstm-cnn-crf_adam_additional --optimizer adam
 ```
 
 ```
@@ -106,7 +106,7 @@ Note that `--input_idx` means that input features (but word feature must be 0-in
 ### Multi-Task Learning Support
 (Now developing this multi-task learning mode...)
 ```
-$ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-crf −−input idx 0 −−output idx 1,2 
+$ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-crf --input idx 0 --output idx 1,2 
 ```
 
 ## How to predict? 
