@@ -63,7 +63,7 @@ def run(data_file, is_train=False, **args):
     xp = cuda.cupy if args['gpu'] >= 0 else np
     efficient_gpu = False
     if args['gpu'] >= 0:
-        cuda.get_device(args['gpu']).use()
+        cuda.get_device_from_id(args['gpu']).use()
         xp.random.seed(1234)
         efficient_gpu = args.get('efficient_gpu', False)
 
@@ -438,7 +438,7 @@ def run(data_file, is_train=False, **args):
             sum_loss += loss.data
 
             # update
-            net.zerograds()
+            net.cleargrads()
             loss.backward()
             opt.update()
 
