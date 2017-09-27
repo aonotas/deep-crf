@@ -108,6 +108,14 @@ def run(data_file, is_train=False, **args):
     if test_file:
         sentences_test = util.read_conll_file(test_file, delimiter=delimiter)
 
+    # Additional setup
+    vocab_adds = []
+    for ad_feat_id in additional_input_idx:
+        sentences_additional_train = [[feat_obj[ad_feat_id] for feat_obj in sentence]
+                                      for sentence in sentences_train]
+        vocab_add = util.build_vocab(sentences_additional_train)
+        vocab_adds.append(vocab_add)
+
     save_vocab = save_name + '.vocab'
     save_vocab_char = save_name + '.vocab_char'
     save_tags_vocab = save_name + '.vocab_tag'
@@ -127,14 +135,11 @@ def run(data_file, is_train=False, **args):
         vocab = util.load_vocab(save_vocab)
         vocab_char = util.load_vocab(save_vocab_char)
         vocab_tags = util.load_vocab(save_tags_vocab)
-
-    # Additional setup
-    vocab_adds = []
-    for ad_feat_id in additional_input_idx:
-        sentences_additional_train = [[feat_obj[ad_feat_id] for feat_obj in sentence]
-                                      for sentence in sentences_train]
-        vocab_add = util.build_vocab(sentences_additional_train)
-        vocab_adds.append(vocab_add)
+        vocab_adds = []
+        for i, idx in enumerate(additional_input_idx):
+            save_additional_vocab = save_name + '.vocab_additional_' + str(i)
+            vocab_add = util.load_vocab(save_additional_vocab)
+            vocab_adds.append(vocab_add)
 
     if args.get('word_emb_file', False):
         # set Pre-trained embeddings
@@ -267,6 +272,10 @@ def run(data_file, is_train=False, **args):
         util.write_vocab(save_vocab_char, vocab_char)
         util.write_vocab(save_tags_vocab, vocab_tags)
         util.write_vocab(save_train_config, args)
+
+        for i, vocab_add in enumerate(vocab_adds):
+            save_additional_vocab = save_name + '.vocab_additional_' + str(i)
+            util.write_vocab(save_additional_vocab, vocab_add)
 
     n_vocab_add = [len(_vadd) for _vadd in vocab_adds]
 
