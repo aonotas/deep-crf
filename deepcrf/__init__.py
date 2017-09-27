@@ -52,8 +52,7 @@ def cli():
 @click.option('--output_idx', type=str, default='-1', help='output_idx for predicting.')
 @click.option('--delimiter', type=str, default='\t',
               help='delimiter string')
-@click.option('--save_name', type=str, default='',
-              help='save_name')
+@click.option('--save_name', type=str, default='bilstm-cnn-crf_adam', help='save_name')
 @click.option('--use_cudnn', type=int, default=1, help='use_cudnn = 0 or 1')
 @click.option('--efficient_gpu', type=int, default=1, help='efficient_gpu (if efficient_gpu == 1, it needs small GPU memory)')
 def train(train_file, **args):
@@ -99,8 +98,7 @@ def train(train_file, **args):
 @click.option('--vocab_char_file', type=click.Path())
 @click.option('--delimiter', type=str, default='\t',
               help='delimiter string')
-@click.option('--save_name', type=str, default='',
-              help='save_name')
+@click.option('--save_name', type=str, default='bilstm-cnn-crf_adam', help='save_name')
 @click.option('--predicted_output', type=str, default='',
               help='predicted_output')
 @click.option('--model_filename', type=click.Path())

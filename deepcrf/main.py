@@ -58,9 +58,6 @@ def run(data_file, is_train=False, **args):
         raise ValueError(err_msg)
 
     save_name = args['save_name']
-    if save_name == '':
-        save_name = '_'.join([model_name, optimizer_name])
-
     save_name = save_dir + save_name
 
     xp = cuda.cupy if args['gpu'] >= 0 else np
@@ -93,8 +90,14 @@ def run(data_file, is_train=False, **args):
             raise ValueError(err_msg)
     else:
         # Predict
-        sentences_train = util.read_raw_file(filename=data_file,
-                                             delimiter=u' ')
+        if len(input_idx) == 1:
+            # raw text format
+            sentences_train = util.read_raw_file(filename=data_file,
+                                                 delimiter=u' ')
+        else:
+            # conll format
+            sentences_train = util.read_conll_file(filename=data_file,
+                                                   delimiter=delimiter)
 
     # sentences_train = sentences_train[:100]
 
@@ -112,7 +115,7 @@ def run(data_file, is_train=False, **args):
 
     # TODO: check unkown pos tags
     # TODO: compute unk words
-    vocab_adds = []
+
     if is_train:
         sentences_words_train = [[w_obj[word_input_idx] for w_obj in sentence]
                                  for sentence in sentences_train]
@@ -120,16 +123,18 @@ def run(data_file, is_train=False, **args):
         vocab_char = util.build_vocab(util.flatten(sentences_words_train))
         vocab_tags = util.build_tag_vocab(sentences_train)
 
-        # Additional setup
-        for ad_feat_id in additional_input_idx:
-            sentences_additional_train = [[feat_obj[ad_feat_id] for feat_obj in sentence]
-                                          for sentence in sentences_train]
-            vocab_add = util.build_vocab(sentences_additional_train)
-            vocab_adds.append(vocab_add)
     elif is_test:
         vocab = util.load_vocab(save_vocab)
         vocab_char = util.load_vocab(save_vocab_char)
         vocab_tags = util.load_vocab(save_tags_vocab)
+
+    # Additional setup
+    vocab_adds = []
+    for ad_feat_id in additional_input_idx:
+        sentences_additional_train = [[feat_obj[ad_feat_id] for feat_obj in sentence]
+                                      for sentence in sentences_train]
+        vocab_add = util.build_vocab(sentences_additional_train)
+        vocab_adds.append(vocab_add)
 
     if args.get('word_emb_file', False):
         # set Pre-trained embeddings
@@ -361,17 +366,19 @@ def run(data_file, is_train=False, **args):
         vocab_tags_inv = dict([(v, k) for k, v in vocab_tags.items()])
         x_predict = x_train
         x_char_predict = x_char_train
+        x_additionals = x_train_additionals
         y_predict = y_train
 
         if dev_file:
-            predict_dev, loss_dev, predict_dev_tags = eval_loop(x_dev, x_char_dev, y_dev)
+            predict_dev, loss_dev, predict_dev_tags = eval_loop(
+                x_dev, x_char_dev, y_dev, x_dev_additionals)
             gold_predict_pairs = [y_dev_cpu, predict_dev_tags]
             result, phrase_info = util.conll_eval(
                 gold_predict_pairs, flag=False, tag_class=tag_names)
             all_result = result['All_Result']
             print 'all_result:', all_result
 
-        predict_pairs, _, _tmp = eval_loop(x_predict, x_char_predict, y_predict)
+        predict_pairs, _, _tmp = eval_loop(x_predict, x_char_predict, y_predict, x_additionals)
         _, predict_tags = zip(*predict_pairs)
         predicted_output = args['predicted_output']
         predicted_results = []
@@ -453,7 +460,7 @@ def run(data_file, is_train=False, **args):
 
         dev_f = all_result[-1]
 
-        if prev_dev_f < dev_f:
+        if prev_dev_f <= dev_f:
             logging.info(' [update best model on dev set!]')
             dev_list = [prev_dev_f, dev_f]
             dev_str = '       ' + ' => '.join(map(str, dev_list))
