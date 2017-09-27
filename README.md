@@ -25,7 +25,7 @@ pip install 'chainer==1.24.0'
 ### train [Ma and Hovy (2016)](https://arxiv.org/abs/1603.01354) model
 ```
 $ mkdir save_model_dir
-$ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --dev_file input_file_dev.txt
+$ deep-crf train input_file.txt --dev_file input_file_dev.txt --save_name bilstm-cnn-crf_adam --optimizer adam
 ```
 ```
 $ cat input_file.txt
@@ -52,12 +52,12 @@ This format is called CoNLL format.
 
 ### Deep BiLSTM-CNN-CRF model (three layers)
 ```
-$ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_layer 3  --dev_file input_file_dev.txt
+$ deep-crf train input_file.txt --n_layer 3  --dev_file input_file_dev.txt --save_name bilstm-cnn-crf_adam --optimizer adam
 ```
 
-### Set Pretrained Word Embeddings 
+### set Pretrained Word Embeddings 
 ```
-$ deep-crf train input_file.txt --delimiter ' ' --model_name bilstm-cnn-crf --n_layer 3 --word_emb_file ./glove.6B.100d.txt  --dev_file input_file_dev.txt
+$ deep-crf train input_file.txt --n_layer 3 --word_emb_file ./glove.6B.100d.txt --word_emb_vocab_type replace_all --dev_file input_file_dev.txt
 ```
 
 We prepare some vocab mode.
@@ -80,7 +80,7 @@ in 0.085703 -0.22201 0.16569 0.13373 0.38239
 
 ### Additional Feature Support
 ```
-$ deep-crf train input_file_multi.txt −−input_idx 0,1 −−output_idx 2 --delimiter ' ' --model_name bilstm-cnn-crf  --dev_file input_file_dev.txt
+$ deep-crf train input_file_multi.txt −−input_idx 0,1 −−output_idx 2 --dev_file input_file_dev.txt --save_name bilstm-cnn-crf_adam_additional --optimizer adam
 ```
 
 ```
@@ -109,9 +109,9 @@ Note that `--input_idx` means that input features (but word feature must be 0-in
 $ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-crf −−input idx 0 −−output idx 1,2 
 ```
 
-## How to predict?
+## How to predict? 
 ```
-$ deep-crf predict input_raw_file.txt --model_name bilstm-cnn-crf --model_filename bilstm-cnn-crf_adam_epoch10.model --predicted_output predicted.txt
+$ deep-crf predict input_raw_file.txt --model_filename ./save_model_dir/bilstm-cnn-crf_adam_epoch3.model --save_name bilstm-cnn-crf_adam  --predicted_output predicted.txt
 ```
 
 Please use following format when `predict`.
@@ -119,6 +119,34 @@ Please use following format when `predict`.
 $ cat input_raw_file.txt
 Barack Hussein Obama is a man .
 Yuji Matsumoto is a man .
+```
+
+Note that `--model_filename` means saved model file path.
+Please set same `--save_name` in training step. 
+
+
+
+## How to predict? (Additional Feature)
+```
+$ deep-crf predict input_file_multi.txt --model_filename ./save_model_dir/bilstm-cnn-crf_multi_epoch3.model --save_name bilstm-cnn-crf_multi  --predicted_output predicted.txt
+```
+Note that you must prepare CoNLL format input file when you use additional feature mode in training step.
+```
+$ cat input_file_multi.txt
+Barack  NN B−PERSON 
+Hussein NN I−PERSON 
+Obama   NN E−PERSON
+is      VBZ O 
+a       DT  O 
+man     NN  O 
+.       .   O
+
+Yuji  NN B−PERSON 
+Matsumoto NN E−PERSON 
+is      VBZ O 
+a       DT  O 
+man     NN  O 
+.       .   O
 ```
 
 ## How to evaluate?
