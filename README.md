@@ -198,7 +198,7 @@ DeepCRF provides following features.
 ### POS Tagging
 Model                                                                      | Accuracy 
 -------------------------------------------------------------------------- | :---: 
-CRFsuit                                                                    | 96.39
+CRFsuite                                                                    | 96.39
 deep-crf                                                                   | 97.45
 [dos Santos and Zadrozny (2014)](http://proceedings.mlr.press/v32/santos14.pdf) | 97.32
 [Ma and Hovy (2016)](https://arxiv.org/abs/1603.01354)                     | 97.55  
@@ -207,7 +207,7 @@ deep-crf                                                                   | 97.
 ### Named Entity Recognition (NER)
 Model                                                                           | Prec. | Recall | F1
 ------------------------------------------------------------------------------- | :---: | :---:  | :---: 
-CRFsuit                                                                         | 84.43 | 83.60  | 84.01
+CRFsuite                                                                         | 84.43 | 83.60  | 84.01
 deep-crf                                                                        | 90.82 | 91.11  | 90.96
 [Ma and Hovy (2016)](https://arxiv.org/abs/1603.01354)                          | 91.35 | 91.06  | 91.21
 
@@ -215,7 +215,7 @@ deep-crf                                                                        
 ### Chunking
 Model                                                                           | Prec. | Recall | F1
 ------------------------------------------------------------------------------- | :---: | :---:  | :---: 
-CRFsuit                                                                         | 93.77 | 93.45  | 93.61
+CRFsuite                                                                         | 93.77 | 93.45  | 93.61
 deep-crf                                                                        | 94.67 | 94.43  | 94.55
 [Huang et al. (2015)](https://arxiv.org/abs/1508.01991)                         |   -   |   -    | 94.46
 
