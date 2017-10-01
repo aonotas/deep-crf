@@ -395,12 +395,11 @@ def run(data_file, is_train=False, **args):
             predicted = [vocab_tags_inv[tag_idx] for tag_idx in to_cpu(predict)]
             predicted_results.append(predicted)
 
-        f = open(predicted_output, 'w')
-        for predicted in predicted_results:
-            for tag in predicted:
-                f.write(tag + '\n')
-            f.write('\n')
-        f.close()
+        with open(predicted_output, 'w') as f:
+            for predicted in predicted_results:
+                for tag in predicted:
+                    f.write(tag + '\n')
+                f.write('\n')
 
         return False
 

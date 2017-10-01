@@ -6,14 +6,15 @@ import util_talbes
 def load_file(filename):
     alltags_list = []
     tags = []
-    for l in open(filename):
-        tag = l.decode('utf-8').strip()
-        if tag == u'':
-            # sentence split
-            alltags_list.append(tags)
-            tags = []
-        else:
-            tags.append(tag)
+    with open(filename) as f:
+        for l in f:
+            tag = l.decode('utf-8').strip()
+            if tag == u'':
+                # sentence split
+                alltags_list.append(tags)
+                tags = []
+            else:
+                tags.append(tag)
     if len(tags):
         alltags_list.append(tags)
         tags = []
