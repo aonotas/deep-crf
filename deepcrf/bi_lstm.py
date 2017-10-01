@@ -49,7 +49,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
         rnn_links = [L.NStepBiLSTM, L.NStepLSTM, L.NStepBiGRU, L.NStepGRU,
                      L.NStepBiRNNTanh, L.NStepRNNTanh]
         if rnn_name not in rnn_names:
-            candidate = ','.join(rnn_list)
+            candidate = ','.join(rnn_names)
             raise ValueError('Invalid RNN name: "%s". Please select from [%s]'
                              % (rnn_name, candidate))
 
