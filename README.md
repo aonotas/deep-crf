@@ -5,6 +5,10 @@ A implementation of Conditional Random Fields (CRFs) with Deep Learning Method.
 
 DeepCRF is a sequene labeling library that uses neural networks and CRFs in Python using Chainer, a flexible deep learning framework.
 
+## Supported version of Python
+* Python 2.x
+* Python 3.x
+
 ## How to install?
 ```
 git clone https://github.com/aonotas/deep-crf.git
