@@ -27,6 +27,9 @@ pip install 'chainer==1.24.0'
 $ mkdir save_model_dir
 $ deep-crf train input_file.txt --delimiter=' ' --dev_file input_file_dev.txt --save_name bilstm-cnn-crf_adam --optimizer adam
 ```
+
+Note that `--dev_file` means path of development file to use early stopping.
+
 ```
 $ cat input_file.txt
 Barack  B−PERSON 
