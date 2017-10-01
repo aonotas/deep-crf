@@ -106,10 +106,10 @@ class BaseCNNEncoder(chainer.Chain):
         word_embs_reshape = F.reshape(word_embs, (1, 1, -1, self.emb_dim))
 
         if self.word_level_flag and char_vecs is not None:
-            # print char_vecs.data.shape
-            # print word_embs.data.shape
+            # print(char_vecs.data.shape)
+            # print(word_embs.data.shape)
             word_embs = F.concat([word_embs, char_vecs], axis=1)
-            # print word_embs.data.shape
+            # print(word_embs.data.shape)
             dim = self.emb_dim + self.add_dim
             word_embs_reshape = F.reshape(word_embs, (1, 1, -1, dim))
 

@@ -237,7 +237,7 @@ def IOB_to_range_format_one(tag_list, is_test_mode=False):
     sentence_lst = []
     ner = []
     ner_type = []
-    # print tag_list
+    # print(tag_list)
     for i in xrange(len(tag_list)):
         prev_tag = tag_list[i - 1] if i != 0 else ''
         prev_tag_type = prev_tag[2:]
