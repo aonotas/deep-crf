@@ -385,7 +385,7 @@ def run(data_file, is_train=False, **args):
             result, phrase_info = util.conll_eval(
                 gold_predict_pairs, flag=False, tag_class=tag_names)
             all_result = result['All_Result']
-            print('all_result:' + all_result)
+            print('all_result: {}'.format(all_result))
 
         predict_pairs, _, _tmp = eval_loop(x_predict, x_char_predict, y_predict, x_additionals)
         _, predict_tags = zip(*predict_pairs)
