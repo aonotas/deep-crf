@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
-from itertools import izip_longest
+import six
+
+if six.PY2:
+    from itertools import izip_longest
+else:
+    from itertools import zip_longest as izip_longest
 
 
 class SimpleTable(object):

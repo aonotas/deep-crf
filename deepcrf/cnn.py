@@ -10,10 +10,10 @@ import chainer.links as L
 import numpy as np
 
 
-from util import UNKWORD, PADDING, BOS
+from .util import UNKWORD, PADDING, BOS
 
 
-from util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
+from .util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
 
 
 class BaseCNNEncoder(chainer.Chain):
@@ -64,7 +64,9 @@ class BaseCNNEncoder(chainer.Chain):
         """
 
         padding_size = self.window_size / 2
-        padding = [self.PAD_IDX] * padding_size
+        padding = []
+        for i in range(int(padding_size)):
+            padding.extend([self.PAD_IDX])
         padding = self.xp.array(padding, dtype=self.xp.int32)
         data_num = len(data)
         ids = []
