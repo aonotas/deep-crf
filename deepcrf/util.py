@@ -47,28 +47,30 @@ def build_tag_vocab(dataset, tag_idx=-1):
 
 
 def write_vocab(filename, vocab):
-    f = open(filename, 'w')
-    for w, idx in sorted(vocab.items(), key=lambda x: x[1]):
-        line = '\t'.join([w.encode('utf-8'), str(idx)])
-        f.write(line + '\n')
+    with open(filename, 'w') as f:
+        for w, idx in sorted(vocab.items(), key=lambda x: x[1]):
+            line = '\t'.join([w.encode('utf-8'), str(idx)])
+            f.write(line + '\n')
 
 
 def load_vocab(filename):
     vocab = {}
-    for l in open(filename):
-        w, idx = l.decode('utf-8').strip().split(u'\t')
-        vocab[w] = int(idx)
+    with open(filename) as f:
+        for l in f:
+            w, idx = l.decode('utf-8').strip().split(u'\t')
+            vocab[w] = int(idx)
     return vocab
 
 
 def read_raw_file(filename, delimiter=u' '):
     sentences = []
-    for l in open(filename):
-        words = l.decode('utf-8').strip().split(delimiter)
-        words = [w.strip() for w in words if len(w.strip()) != 0]
-        if len(words) and len(words[0]):
-            words = [(w, -1) for w in words]
-            sentences.append(words)
+    with open(filename) as f:
+        for l in f:
+            words = l.decode('utf-8').strip().split(delimiter)
+            words = [w.strip() for w in words if len(w.strip()) != 0]
+            if len(words) and len(words[0]):
+                words = [(w, -1) for w in words]
+                sentences.append(words)
     return sentences
 
 
@@ -76,24 +78,25 @@ def read_conll_file(filename, delimiter=u'\t', input_idx=0, output_idx=-1):
     sentence = []
     sentences = []
     n_features = -1
-    for line_idx, l in enumerate(open(filename, 'r')):
-        l_split = l.strip().decode('utf-8').split(delimiter)
-        l_split = [_.strip() for _ in l_split]
-        if len(l_split) <= 1:
-            if len(sentence) > 0:
-                sentences.append(sentence)
-                sentence = []
-            continue
-        else:
-            if n_features == -1:
-                n_features = len(l_split)
+    with open(filename, 'r') as f:
+        for line_idx, l in enumerate(f):
+            l_split = l.strip().decode('utf-8').split(delimiter)
+            l_split = [_.strip() for _ in l_split]
+            if len(l_split) <= 1:
+                if len(sentence) > 0:
+                    sentences.append(sentence)
+                    sentence = []
+                continue
+            else:
+                if n_features == -1:
+                    n_features = len(l_split)
 
-            if n_features != len(l_split):
-                val = (str(len(l_split)), str(len(line_idx)))
-                err_msg = 'Invalid input feature sizes: "%s". \
-                Please check at line [%s]' % val
-                raise ValueError(err_msg)
-            sentence.append(l_split)
+                if n_features != len(l_split):
+                    val = (str(len(l_split)), str(len(line_idx)))
+                    err_msg = 'Invalid input feature sizes: "%s". \
+                    Please check at line [%s]' % val
+                    raise ValueError(err_msg)
+                sentence.append(l_split)
     if len(sentence) > 0:
         sentences.append(sentence)
     return sentences
@@ -102,15 +105,16 @@ def read_conll_file(filename, delimiter=u'\t', input_idx=0, output_idx=-1):
 def load_glove_embedding(filename, vocab):
     word_ids = []
     word_vecs = []
-    for i, l in enumerate(open(filename)):
-        l = l.decode('utf-8').split(u' ')
-        word = l[0].lower()
+    with open(filename) as f:
+        for i, l in enumerate(f):
+            l = l.decode('utf-8').split(u' ')
+            word = l[0].lower()
 
-        if word in vocab:
-            word_ids.append(vocab.get(word))
-            vec = l[1:]
-            vec = map(float, vec)
-            word_vecs.append(vec)
+            if word in vocab:
+                word_ids.append(vocab.get(word))
+                vec = l[1:]
+                vec = map(float, vec)
+                word_vecs.append(vec)
     word_ids = np.array(word_ids, dtype=np.int32)
     word_vecs = np.array(word_vecs, dtype=np.float32)
     return word_ids, word_vecs
@@ -122,14 +126,15 @@ def load_glove_embedding_include_vocab(filename):
     vocab[PADDING] = len(vocab)
     vocab[UNKWORD] = len(vocab)
 
-    for i, l in enumerate(open(filename)):
-        l = l.decode('utf-8').split(u' ')
-        word = l[0].lower()
-        if word not in vocab:
-            vocab[word] = len(vocab)
-            vec = l[1:]
-            vec = map(float, vec)
-            word_vecs.append(vec)
+    with open(filename) as f:
+        for i, l in enumerate(f):
+            l = l.decode('utf-8').split(u' ')
+            word = l[0].lower()
+            if word not in vocab:
+                vocab[word] = len(vocab)
+                vec = l[1:]
+                vec = map(float, vec)
+                word_vecs.append(vec)
 
     # PADDING, UNKWORD
     word_vecs.insert(0, np.random.random((len(vec),)))
