@@ -65,4 +65,4 @@ def run(gold_file, predicted_file, **args):
     table.print_table()
 
     # accuracy = util.eval_accuracy(gold_predict_pairs, flag=False)
-    # print('Tag Accuracy:' + accuracy)
+    # print('Tag Accuracy: {}'.format(accuracy))
