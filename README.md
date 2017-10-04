@@ -28,7 +28,7 @@ pip install 'chainer==1.24.0'
 ## How to train?
 ### train [Ma and Hovy (2016)](https://arxiv.org/abs/1603.01354) model
 ```
-$ deep-crf train input_file.txt --delimiter=' ' --dev_file input_file_dev.txt --save_dir save_model_dir --save_dir save_model_dir --save_name bilstm-cnn-crf_adam --optimizer adam
+$ deep-crf train input_file.txt --delimiter=' ' --dev_file input_file_dev.txt --save_dir save_model_dir --save_name bilstm-cnn-crf_adam --optimizer adam
 ```
 
 Note that `--dev_file` means path of development file to use early stopping.
