@@ -50,8 +50,8 @@ def build_tag_vocab(dataset, tag_idx=-1):
 
 def write_vocab(filename, vocab):
     with open(filename, 'w') as f:
-        for w, idx in sorted(vocab.items(), key=lambda x: to_str(x[1])):
-            line = '\t'.join([unicode_to_str_2(w), to_str(idx)])
+        for e in sorted([[unicode_to_str_2(w), to_str(i)] for w, i in vocab.items()], key=lambda x: x[1]):
+            line = '\t'.join(e)
             f.write(line + '\n')
 
 
