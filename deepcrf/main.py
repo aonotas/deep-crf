@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 to_cpu = chainer.cuda.to_cpu
 
 import os.path
+import six.moves
 
 version = chainer.__version__
 
@@ -410,7 +411,7 @@ def run(data_file, is_train=False, **args):
     t = 0.0
     prev_dev_accuracy = 0.0
     prev_dev_f = 0.0
-    for epoch in range(args['max_iter']):
+    for epoch in six.moves.range(args['max_iter']):
 
         # train
         net.set_train(train=True)

@@ -19,7 +19,7 @@ from .cnn import CharCNNEncoder
 import deepcrf.util
 from .util import PADDING, UNKWORD
 
-import six
+import six.moves
 
 to_cpu = chainer.cuda.to_cpu
 

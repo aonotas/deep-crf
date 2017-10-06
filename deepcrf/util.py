@@ -189,7 +189,7 @@ def conll_eval(gold_predict_pairs, flag=True, tag_class=None):
         cnt_phrases_dict[tag_name]['gold_cnt'] = 0
         cnt_phrases_dict[tag_name]['correct_cnt'] = 0
 
-    for i in range(len(gold_tags)):
+    for i in six.moves.range(len(gold_tags)):
         gold = gold_tags[i]
         predict = predict_tags[i]
 
@@ -245,7 +245,7 @@ def IOB_to_range_format_one(tag_list, is_test_mode=False):
     ner = []
     ner_type = []
     # print(tag_list)
-    for i in range(len(tag_list)):
+    for i in six.moves.range(len(tag_list)):
         prev_tag = tag_list[i - 1] if i != 0 else ''
         prev_tag_type = prev_tag[2:]
         # prev_tag_head = tag_list[i-1][0] if i != 0 else ''
