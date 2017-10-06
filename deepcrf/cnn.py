@@ -34,7 +34,7 @@ class BaseCNNEncoder(chainer.Chain):
             conv=L.Convolution2D(1, hidden_dim,
                                  ksize=(window_size, dim),
                                  stride=(1, dim),
-                                 pad=(window_size / 2, 0))
+                                 pad=(window_size // 2, 0))
         )
         self.spliter = spliter
         self.char_level_flag = True if self.spliter is None else False
@@ -63,7 +63,7 @@ class BaseCNNEncoder(chainer.Chain):
         separator = None
         """
 
-        padding_size = self.window_size / 2
+        padding_size = self.window_size // 2
         padding = []
         for i in range(int(padding_size)):
             padding.extend([self.PAD_IDX])
