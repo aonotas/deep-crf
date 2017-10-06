@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
-import six
-
-if six.PY2:
-    from itertools import izip_longest
-else:
-    from itertools import zip_longest as izip_longest
+import six.moves
 
 
 class SimpleTable(object):
@@ -24,11 +19,11 @@ class SimpleTable(object):
 
     def _calc_maxes(self):
         array = [self.header] + self.rows
-        return [max(len(str(s)) for s in ss) for ss in izip_longest(*array, fillvalue='')]
+        return [max(len(str(s)) for s in ss) for ss in six.moves.zip_longest(*array, fillvalue='')]
 
     def _get_printable_row(self, row):
         maxes = self._calc_maxes()
-        return '| ' + ' | '.join([('{0: <%d}' % m).format(r) for r, m in izip_longest(row, maxes, fillvalue='')]) + ' |'
+        return '| ' + ' | '.join([('{0: <%d}' % m).format(r) for r, m in six.moves.zip_longest(row, maxes, fillvalue='')]) + ' |'
 
     def _get_printable_header(self):
         return self._get_printable_row(self.header)
