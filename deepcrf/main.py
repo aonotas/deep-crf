@@ -41,7 +41,7 @@ def my_cudnn(cudnn_flag):
 
 def run(data_file, is_train=False, **args):
     for k in args.keys():
-        args[k] = deepcrf.util.str_to_unicode_2(args[k])
+        args[k] = deepcrf.util.str_to_unicode_python2(args[k])
 
     is_test = not is_train
     batchsize = args['batchsize']

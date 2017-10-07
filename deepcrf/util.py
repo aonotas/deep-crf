@@ -50,7 +50,7 @@ def build_tag_vocab(dataset, tag_idx=-1):
 
 def write_vocab(filename, vocab):
     with open(filename, 'w') as f:
-        for e in sorted([[unicode_to_str_2(w), to_str(i)] for w, i in vocab.items()], key=lambda x: x[1]):
+        for e in sorted([[unicode_to_str_python2(w), to_str(i)] for w, i in vocab.items()], key=lambda x: x[1]):
             line = '\t'.join(e)
             f.write(line + '\n')
 
@@ -59,7 +59,7 @@ def load_vocab(filename):
     vocab = {}
     with open(filename) as f:
         for l in f:
-            w, idx = str_to_unicode_2(l).strip().split(u'\t')
+            w, idx = str_to_unicode_python2(l).strip().split(u'\t')
             vocab[w] = int(idx)
     return vocab
 
@@ -68,7 +68,7 @@ def read_raw_file(filename, delimiter=u' '):
     sentences = []
     with open(filename) as f:
         for l in f:
-            words = str_to_unicode_2(l).strip().split(delimiter)
+            words = str_to_unicode_python2(l).strip().split(delimiter)
             words = [w.strip() for w in words if len(w.strip()) != 0]
             if len(words) and len(words[0]):
                 words = [(w, -1) for w in words]
@@ -82,7 +82,7 @@ def read_conll_file(filename, delimiter=u'\t', input_idx=0, output_idx=-1):
     n_features = -1
     with open(filename, 'r') as f:
         for line_idx, l in enumerate(f):
-            l_split = str_to_unicode_2(l).strip().split(delimiter)
+            l_split = str_to_unicode_python2(l).strip().split(delimiter)
             l_split = [_.strip() for _ in l_split]
             if len(l_split) <= 1:
                 if len(sentence) > 0:
@@ -109,7 +109,7 @@ def load_glove_embedding(filename, vocab):
     word_vecs = []
     with open(filename) as f:
         for i, l in enumerate(f):
-            l = str_to_unicode_2(l).split(u' ')
+            l = str_to_unicode_python2(l).split(u' ')
             word = l[0].lower()
 
             if word in vocab:
@@ -130,7 +130,7 @@ def load_glove_embedding_include_vocab(filename):
 
     with open(filename) as f:
         for i, l in enumerate(f):
-            l = str_to_unicode_2(l).split(u' ')
+            l = str_to_unicode_python2(l).split(u' ')
             word = l[0].lower()
             if word not in vocab:
                 vocab[word] = len(vocab)
@@ -334,20 +334,20 @@ def uniq_tagset(alltags_list, tag_names=[]):
 
 def to_str(s):
     """
-    To str
+    Convert to str
     :param s: something
     :return: str
     """
     if six.PY2 and isinstance(s, unicode):
-        s = unicode_to_str_2(s)
+        s = unicode_to_str_python2(s)
     elif not isinstance(s, str):
         s = str(s)
     return s
 
 
-def unicode_to_str_2(u):
+def unicode_to_str_python2(u):
     """
-    Unicode to str when Python 2.x
+    In Python 2.x, convert unicode to str
     :param u: unicode
     :return: str
     """
@@ -356,9 +356,9 @@ def unicode_to_str_2(u):
     return u
 
 
-def str_to_unicode_2(s):
+def str_to_unicode_python2(s):
     """
-    Str to unicode when Python 2.x
+    In Python 2.x, convert str to unicode
     :param s: str
     :return: unicode
     """

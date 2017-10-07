@@ -8,7 +8,7 @@ def load_file(filename):
     tags = []
     with open(filename) as f:
         for l in f:
-            tag = deepcrf.util.str_to_unicode_2(l).strip()
+            tag = deepcrf.util.str_to_unicode_python2(l).strip()
             if tag == u'':
                 # sentence split
                 alltags_list.append(tags)
