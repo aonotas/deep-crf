@@ -45,8 +45,6 @@ def run(data_file, is_train=False, **args):
     optimizer_name = args['optimizer']
     save_dir = args['save_dir']
     print(args)
-    if save_dir[-1] != '/':
-        save_dir = save_dir + '/'
 
     # TODO: check save_dir exist
     if not os.path.isdir(save_dir):
@@ -58,7 +56,7 @@ def run(data_file, is_train=False, **args):
         raise ValueError(err_msg)
 
     save_name = args['save_name']
-    save_name = save_dir + save_name
+    save_name = os.path.join(save_dir, save_name)
 
     xp = cuda.cupy if args['gpu'] >= 0 else np
     efficient_gpu = False
@@ -370,7 +368,7 @@ def run(data_file, is_train=False, **args):
     if is_test:
         # predict
         # model_filename = args['model_filename']
-        # model_filename = save_dir + model_filename
+        # model_filename = os.path.join(save_dir, model_filename)
         # serializers.load_hdf5(model_filename, net)
         vocab_tags_inv = dict([(v, k) for k, v in vocab_tags.items()])
         x_predict = x_train
