@@ -19,7 +19,7 @@ from util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
 class BaseCNNEncoder(chainer.Chain):
 
     def __init__(self, emb_dim=100, window_size=3, init_emb=None,
-                 hidden_dim=100, vocab_size=0, spliter=u' ', add_dim=0,
+                 hidden_dim=100, vocab_size=0, splitter=u' ', add_dim=0,
                  PAD_IDX=None):
         """
         Neural network tagger by dos (Santos and Zadrozny, ICML 2014).
@@ -36,8 +36,8 @@ class BaseCNNEncoder(chainer.Chain):
                                  stride=(1, dim),
                                  pad=(window_size / 2, 0))
         )
-        self.spliter = spliter
-        self.char_level_flag = True if self.spliter is None else False
+        self.splitter = splitter
+        self.char_level_flag = True if self.splitter is None else False
         self.word_level_flag = not self.char_level_flag
         self.emb_dim = emb_dim
         self.window_size = window_size
@@ -146,7 +146,7 @@ class CharCNNEncoder(BaseCNNEncoder):
         """
         super(CharCNNEncoder, self).__init__(
             emb_dim=emb_dim, window_size=window_size, init_emb=init_emb,
-            hidden_dim=hidden_dim, spliter=None, vocab_size=vocab_size,
+            hidden_dim=hidden_dim, splitter=None, vocab_size=vocab_size,
             PAD_IDX=PAD_IDX)
 
 
@@ -160,5 +160,5 @@ class WordCNNEncoder(BaseCNNEncoder):
         """
         super(WordCNNEncoder, self).__init__(
             emb_dim=emb_dim, window_size=window_size, init_emb=init_emb,
-            hidden_dim=hidden_dim, spliter=u' ', add_dim=add_dim,
+            hidden_dim=hidden_dim, splitter=u' ', add_dim=add_dim,
             vocab_size=vocab_size, PAD_IDX=PAD_IDX)
