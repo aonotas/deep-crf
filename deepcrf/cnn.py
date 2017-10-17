@@ -123,8 +123,8 @@ class BaseCNNEncoder(chainer.Chain):
         word_emb_conv_reshape = F.split_axis(word_emb_conv_reshape,
                                              word_boundaries, axis=1)
 
-        embs = [F.max(word_emb_conv_word, axis=1) for i, word_emb_conv_word in
-                enumerate(word_emb_conv_reshape) if i % 2 == 1]
+        embs = [F.max(word_emb_conv_word, axis=1)
+                for i, word_emb_conv_word in enumerate(word_emb_conv_reshape) if i % 2 == 1]
         embs = F.concat(embs, axis=0)
         phrase_emb_conv = F.reshape(embs,
                                     (phrase_num, self.hidden_dim))
