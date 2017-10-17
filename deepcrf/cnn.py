@@ -75,7 +75,7 @@ class BaseCNNEncoder(chainer.Chain):
 
         for words in data:
             if self.char_level_flag:
-                # Char-level (dont lowecase)
+                # Char-level (don't lowercase)
                 ids.append(words)
                 i_char += len(words)
 

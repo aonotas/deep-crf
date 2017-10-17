@@ -121,7 +121,7 @@ def run(data_file, is_train=False, **args):
     save_tags_vocab = save_name + '.vocab_tag'
     save_train_config = save_name + '.train_config'
 
-    # TODO: check unkown pos tags
+    # TODO: check unknown pos tags
     # TODO: compute unk words
 
     if is_train:
