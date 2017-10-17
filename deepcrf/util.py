@@ -143,6 +143,7 @@ def load_glove_embedding_include_vocab(filename):
     word_vecs = np.array(word_vecs, dtype=np.float32)
     return word_vecs, vocab
 
+
 # Conll 03 shared task evaluation code (IOB format only)
 
 

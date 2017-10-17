@@ -28,7 +28,6 @@ from util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
 
 
 class BiLSTM_CNN_CRF(chainer.Chain):
-
     def __init__(self, n_vocab=None, n_char_vocab=None, emb_dim=100,
                  hidden_dim=200, init_emb=None, use_dropout=0.33, n_layers=1,
                  n_label=0, use_crf=True, use_bi=True, char_input_dim=100,
@@ -64,7 +63,6 @@ class BiLSTM_CNN_CRF(chainer.Chain):
             self.word_embed.W.data[:] = init_emb[:]
 
         if use_char:
-
             char_cnn = CharCNNEncoder(emb_dim=char_input_dim, window_size=3,
                                       hidden_dim=char_hidden_dim,
                                       vocab_size=n_char_vocab, init_emb=None,
@@ -113,7 +111,6 @@ class BiLSTM_CNN_CRF(chainer.Chain):
         my_set_train(train)
 
     def predict(self, y_list, t, compute_loss=True):
-
         predict_list = []
         cnt = 0
         for n_len in self.n_length:
@@ -191,7 +188,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
             x = my_dropout(x, ratio=self.use_dropout, train=self.train)
             xs.append(x)
 
-        _hy_f, _cy_f, h_vecs = self.rnn(hx=hx, cx=cx, xs=xs,)
+        _hy_f, _cy_f, h_vecs = self.rnn(hx=hx, cx=cx, xs=xs, )
 
         h_vecs = F.concat(h_vecs, axis=0)
         if self.use_dropout:
