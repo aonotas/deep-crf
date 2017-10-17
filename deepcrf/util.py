@@ -218,10 +218,14 @@ def conll_eval(gold_predict_pairs, flag=True, tag_class=None):
     phrase_info = [num_gold_phrase, num_predict_phrase, lst_gold_phrase, lst_predict_phrase]
 
     for tag_name in tag_class:
-        recall = cnt_phrases_dict[tag_name][
-            'correct_cnt'] / float(cnt_phrases_dict[tag_name]['gold_cnt']) if cnt_phrases_dict[tag_name]['gold_cnt'] else 0.0
-        precision = cnt_phrases_dict[tag_name]['correct_cnt'] / float(
-            cnt_phrases_dict[tag_name]['predict_cnt']) if cnt_phrases_dict[tag_name]['predict_cnt'] else 0.0
+        if cnt_phrases_dict[tag_name]['gold_cnt']:
+            recall = cnt_phrases_dict[tag_name]['correct_cnt'] / float(cnt_phrases_dict[tag_name]['gold_cnt'])
+        else:
+            recall = 0.0
+        if cnt_phrases_dict[tag_name]['predict_cnt']:
+            precision = cnt_phrases_dict[tag_name]['correct_cnt'] / float(cnt_phrases_dict[tag_name]['predict_cnt'])
+        else:
+            precision = 0.0
         sum_recall_precision = 1.0 if recall + precision == 0.0 else recall + precision
         f_measure = (2 * recall * precision) / (sum_recall_precision)
         evals[tag_name] = [precision * 100.0, recall * 100.0, f_measure * 100.0]
