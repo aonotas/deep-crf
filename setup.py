@@ -8,6 +8,7 @@ setup(
     include_package_data=False,
     install_requires=[
         'Click',
+        'h5py'
     ],
     entry_points='''
         [console_scripts]
