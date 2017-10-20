@@ -13,10 +13,10 @@ from chainer import optimizers
 from chainer import serializers
 import chainer.functions as F
 
-from bi_lstm import BiLSTM_CNN_CRF
+from .bi_lstm import BiLSTM_CNN_CRF
 
-import util
-from util import PADDING, UNKWORD
+import deepcrf.util
+from .util import PADDING, UNKWORD
 
 
 import logging
@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 to_cpu = chainer.cuda.to_cpu
 
 import os.path
+import six.moves
 
 version = chainer.__version__
 
@@ -39,6 +40,9 @@ def my_cudnn(cudnn_flag):
 
 
 def run(data_file, is_train=False, **args):
+    for k in args.keys():
+        args[k] = deepcrf.util.str_to_unicode_python2(args[k])
+
     is_test = not is_train
     batchsize = args['batchsize']
     model_name = args['model_name']
@@ -76,14 +80,13 @@ def run(data_file, is_train=False, **args):
     dev_file = args['dev_file']
     test_file = args['test_file']
     delimiter = args['delimiter']
-    input_idx = map(int, args['input_idx'].split(','))
-    output_idx = map(int, args['output_idx'].split(','))
+    input_idx = list(map(int, args['input_idx'].split(',')))
+    output_idx = list(map(int, args['output_idx'].split(',')))
     word_input_idx = input_idx[0]  # NOTE: word_idx is first column!
     additional_input_idx = input_idx[1:]
     sentences_train = []
     if is_train:
-        sentences_train = util.read_conll_file(filename=data_file,
-                                               delimiter=delimiter)
+        sentences_train = deepcrf.util.read_conll_file(filename=data_file, delimiter=delimiter)
         if len(sentences_train) == 0:
             s = str(len(sentences_train))
             err_msg = 'Invalid training sizes: {} sentences. '.format(s)
@@ -92,28 +95,26 @@ def run(data_file, is_train=False, **args):
         # Predict
         if len(input_idx) == 1:
             # raw text format
-            sentences_train = util.read_raw_file(filename=data_file,
-                                                 delimiter=u' ')
+            sentences_train = deepcrf.util.read_raw_file(filename=data_file, delimiter=u' ')
         else:
             # conll format
-            sentences_train = util.read_conll_file(filename=data_file,
-                                                   delimiter=delimiter)
+            sentences_train = deepcrf.util.read_conll_file(filename=data_file, delimiter=delimiter)
 
     # sentences_train = sentences_train[:100]
 
     sentences_dev = []
     sentences_test = []
     if dev_file:
-        sentences_dev = util.read_conll_file(dev_file, delimiter=delimiter)
+        sentences_dev = deepcrf.util.read_conll_file(dev_file, delimiter=delimiter)
     if test_file:
-        sentences_test = util.read_conll_file(test_file, delimiter=delimiter)
+        sentences_test = deepcrf.util.read_conll_file(test_file, delimiter=delimiter)
 
     # Additional setup
     vocab_adds = []
     for ad_feat_id in additional_input_idx:
         sentences_additional_train = [[feat_obj[ad_feat_id] for feat_obj in sentence]
                                       for sentence in sentences_train]
-        vocab_add = util.build_vocab(sentences_additional_train)
+        vocab_add = deepcrf.util.build_vocab(sentences_additional_train)
         vocab_adds.append(vocab_add)
 
     save_vocab = save_name + '.vocab'
@@ -127,18 +128,18 @@ def run(data_file, is_train=False, **args):
     if is_train:
         sentences_words_train = [[w_obj[word_input_idx] for w_obj in sentence]
                                  for sentence in sentences_train]
-        vocab = util.build_vocab(sentences_words_train)
-        vocab_char = util.build_vocab(util.flatten(sentences_words_train))
-        vocab_tags = util.build_tag_vocab(sentences_train)
+        vocab = deepcrf.util.build_vocab(sentences_words_train)
+        vocab_char = deepcrf.util.build_vocab(deepcrf.util.flatten(sentences_words_train))
+        vocab_tags = deepcrf.util.build_tag_vocab(sentences_train)
 
     elif is_test:
-        vocab = util.load_vocab(save_vocab)
-        vocab_char = util.load_vocab(save_vocab_char)
-        vocab_tags = util.load_vocab(save_tags_vocab)
+        vocab = deepcrf.util.load_vocab(save_vocab)
+        vocab_char = deepcrf.util.load_vocab(save_vocab_char)
+        vocab_tags = deepcrf.util.load_vocab(save_tags_vocab)
         vocab_adds = []
         for i, idx in enumerate(additional_input_idx):
             save_additional_vocab = save_name + '.vocab_additional_' + str(i)
-            vocab_add = util.load_vocab(save_additional_vocab)
+            vocab_add = deepcrf.util.load_vocab(save_additional_vocab)
             vocab_adds.append(vocab_add)
 
     if args.get('word_emb_file', False):
@@ -160,14 +161,14 @@ def run(data_file, is_train=False, **args):
 
         if word_emb_vocab_type == 'replace_all':
             # replace all vocab by Pre-trained embeddings
-            word_vecs, vocab_glove = util.load_glove_embedding_include_vocab(emb_file)
+            word_vecs, vocab_glove = deepcrf.util.load_glove_embedding_include_vocab(emb_file)
             vocab = vocab_glove
         elif word_emb_vocab_type == 'replace_only':
-            word_ids, word_vecs = util.load_glove_embedding(emb_file, vocab)
+            word_ids, word_vecs = deepcrf.util.load_glove_embedding(emb_file, vocab)
             assert_no_emb(word_vecs)
 
         elif word_emb_vocab_type == 'additional':
-            word_vecs, vocab_glove = util.load_glove_embedding_include_vocab(emb_file)
+            word_vecs, vocab_glove = deepcrf.util.load_glove_embedding_include_vocab(emb_file)
             additional_vecs = []
             for word, word_idx in sorted(vocab_glove.items(), key=lambda x: x[1]):
                 if word not in vocab:
@@ -177,11 +178,11 @@ def run(data_file, is_train=False, **args):
 
     if args.get('vocab_file', False):
         vocab_file = args['vocab_file']
-        vocab = util.load_vocab(vocab_file)
+        vocab = deepcrf.util.load_vocab(vocab_file)
 
     if args.get('vocab_char_file', False):
         vocab_char_file = args['vocab_char_file']
-        vocab_char = util.load_vocab(vocab_char_file)
+        vocab_char = deepcrf.util.load_vocab(vocab_char_file)
 
     vocab_tags_inv = dict((v, k) for k, v in vocab_tags.items())
     PAD_IDX = vocab[PADDING]
@@ -195,16 +196,16 @@ def run(data_file, is_train=False, **args):
         tmp_xp = np  # use CPU (numpy)
 
     def parse_to_word_ids(sentences, word_input_idx, vocab):
-        return util.parse_to_word_ids(sentences, xp=tmp_xp, vocab=vocab,
-                                      UNK_IDX=UNK_IDX, idx=word_input_idx)
+        return deepcrf.util.parse_to_word_ids(sentences, xp=tmp_xp, vocab=vocab,
+                                              UNK_IDX=UNK_IDX, idx=word_input_idx)
 
     def parse_to_char_ids(sentences):
-        return util.parse_to_char_ids(sentences, xp=tmp_xp, vocab_char=vocab_char,
-                                      UNK_IDX=CHAR_UNK_IDX, idx=word_input_idx)
+        return deepcrf.util.parse_to_char_ids(sentences, xp=tmp_xp, vocab_char=vocab_char,
+                                              UNK_IDX=CHAR_UNK_IDX, idx=word_input_idx)
 
     def parse_to_tag_ids(sentences):
-        return util.parse_to_tag_ids(sentences, xp=tmp_xp, vocab=vocab_tags,
-                                     UNK_IDX=-1, idx=-1)
+        return deepcrf.util.parse_to_tag_ids(sentences, xp=tmp_xp, vocab=vocab_tags,
+                                             UNK_IDX=-1, idx=-1)
 
     x_train = parse_to_word_ids(sentences_train, word_input_idx, vocab)
     x_char_train = parse_to_char_ids(sentences_train)
@@ -268,14 +269,14 @@ def run(data_file, is_train=False, **args):
     init_emb = None
 
     if is_train:
-        util.write_vocab(save_vocab, vocab)
-        util.write_vocab(save_vocab_char, vocab_char)
-        util.write_vocab(save_tags_vocab, vocab_tags)
-        util.write_vocab(save_train_config, args)
+        deepcrf.util.write_vocab(save_vocab, vocab)
+        deepcrf.util.write_vocab(save_vocab_char, vocab_char)
+        deepcrf.util.write_vocab(save_tags_vocab, vocab_tags)
+        deepcrf.util.write_vocab(save_train_config, args)
 
         for i, vocab_add in enumerate(vocab_adds):
             save_additional_vocab = save_name + '.vocab_additional_' + str(i)
-            util.write_vocab(save_additional_vocab, vocab_add)
+            deepcrf.util.write_vocab(save_additional_vocab, vocab_add)
 
     n_vocab_add = [len(_vadd) for _vadd in vocab_adds]
 
@@ -382,7 +383,7 @@ def run(data_file, is_train=False, **args):
             predict_dev, loss_dev, predict_dev_tags = eval_loop(
                 x_dev, x_char_dev, y_dev, x_dev_additionals)
             gold_predict_pairs = [y_dev_cpu, predict_dev_tags]
-            result, phrase_info = util.conll_eval(
+            result, phrase_info = deepcrf.util.conll_eval(
                 gold_predict_pairs, flag=False, tag_class=tag_names)
             all_result = result['All_Result']
             print('all_result: {}'.format(all_result))
@@ -407,7 +408,7 @@ def run(data_file, is_train=False, **args):
     t = 0.0
     prev_dev_accuracy = 0.0
     prev_dev_f = 0.0
-    for epoch in xrange(args['max_iter']):
+    for epoch in six.moves.range(args['max_iter']):
 
         # train
         net.set_train(train=True)
@@ -444,7 +445,7 @@ def run(data_file, is_train=False, **args):
             predict_train.extend(predict)
 
         # Evaluation
-        train_accuracy = util.eval_accuracy(predict_train)
+        train_accuracy = deepcrf.util.eval_accuracy(predict_train)
 
         logging.info('epoch:' + str(epoch))
         logging.info(' [train]')
@@ -456,11 +457,11 @@ def run(data_file, is_train=False, **args):
             x_dev, x_char_dev, y_dev, x_dev_additionals)
 
         gold_predict_pairs = [y_dev_cpu, predict_dev_tags]
-        result, phrase_info = util.conll_eval(gold_predict_pairs, flag=False, tag_class=tag_names)
+        result, phrase_info = deepcrf.util.conll_eval(gold_predict_pairs, flag=False, tag_class=tag_names)
         all_result = result['All_Result']
 
         # Evaluation
-        dev_accuracy = util.eval_accuracy(predict_dev)
+        dev_accuracy = deepcrf.util.eval_accuracy(predict_dev)
         logging.info(' [dev]')
         logging.info('  loss     :' + str(loss_dev))
         logging.info('  accuracy :' + str(dev_accuracy))

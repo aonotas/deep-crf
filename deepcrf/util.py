@@ -5,6 +5,8 @@ import numpy as np
 
 from itertools import chain
 
+import six
+
 pattern_num = re.compile(r'[0-9]')
 CHAR_PADDING = u"_"
 UNKWORD = u"UNKNOWN"
@@ -48,8 +50,8 @@ def build_tag_vocab(dataset, tag_idx=-1):
 
 def write_vocab(filename, vocab):
     with open(filename, 'w') as f:
-        for w, idx in sorted(vocab.items(), key=lambda x: x[1]):
-            line = '\t'.join([w.encode('utf-8'), str(idx)])
+        for e in sorted([[unicode_to_str_python2(w), to_str(i)] for w, i in vocab.items()], key=lambda x: x[1]):
+            line = '\t'.join(e)
             f.write(line + '\n')
 
 
@@ -57,7 +59,7 @@ def load_vocab(filename):
     vocab = {}
     with open(filename) as f:
         for l in f:
-            w, idx = l.decode('utf-8').strip().split(u'\t')
+            w, idx = str_to_unicode_python2(l).strip().split(u'\t')
             vocab[w] = int(idx)
     return vocab
 
@@ -66,7 +68,7 @@ def read_raw_file(filename, delimiter=u' '):
     sentences = []
     with open(filename) as f:
         for l in f:
-            words = l.decode('utf-8').strip().split(delimiter)
+            words = str_to_unicode_python2(l).strip().split(delimiter)
             words = [w.strip() for w in words if len(w.strip()) != 0]
             if len(words) and len(words[0]):
                 words = [(w, -1) for w in words]
@@ -80,7 +82,7 @@ def read_conll_file(filename, delimiter=u'\t', input_idx=0, output_idx=-1):
     n_features = -1
     with open(filename, 'r') as f:
         for line_idx, l in enumerate(f):
-            l_split = l.strip().decode('utf-8').split(delimiter)
+            l_split = str_to_unicode_python2(l).strip().split(delimiter)
             l_split = [_.strip() for _ in l_split]
             if len(l_split) <= 1:
                 if len(sentence) > 0:
@@ -107,13 +109,13 @@ def load_glove_embedding(filename, vocab):
     word_vecs = []
     with open(filename) as f:
         for i, l in enumerate(f):
-            l = l.decode('utf-8').split(u' ')
+            l = str_to_unicode_python2(l).split(u' ')
             word = l[0].lower()
 
             if word in vocab:
                 word_ids.append(vocab.get(word))
                 vec = l[1:]
-                vec = map(float, vec)
+                vec = list(map(float, vec))
                 word_vecs.append(vec)
     word_ids = np.array(word_ids, dtype=np.int32)
     word_vecs = np.array(word_vecs, dtype=np.float32)
@@ -128,12 +130,12 @@ def load_glove_embedding_include_vocab(filename):
 
     with open(filename) as f:
         for i, l in enumerate(f):
-            l = l.decode('utf-8').split(u' ')
+            l = str_to_unicode_python2(l).split(u' ')
             word = l[0].lower()
             if word not in vocab:
                 vocab[word] = len(vocab)
                 vec = l[1:]
-                vec = map(float, vec)
+                vec = list(map(float, vec))
                 word_vecs.append(vec)
 
     # PADDING, UNKWORD
@@ -187,7 +189,7 @@ def conll_eval(gold_predict_pairs, flag=True, tag_class=None):
         cnt_phrases_dict[tag_name]['gold_cnt'] = 0
         cnt_phrases_dict[tag_name]['correct_cnt'] = 0
 
-    for i in xrange(len(gold_tags)):
+    for i in six.moves.range(len(gold_tags)):
         gold = gold_tags[i]
         predict = predict_tags[i]
 
@@ -243,7 +245,7 @@ def IOB_to_range_format_one(tag_list, is_test_mode=False):
     ner = []
     ner_type = []
     # print(tag_list)
-    for i in xrange(len(tag_list)):
+    for i in six.moves.range(len(tag_list)):
         prev_tag = tag_list[i - 1] if i != 0 else ''
         prev_tag_type = prev_tag[2:]
         # prev_tag_head = tag_list[i-1][0] if i != 0 else ''
@@ -328,3 +330,38 @@ def uniq_tagset(alltags_list, tag_names=[]):
             if tagname != u'' and tagname not in tag_names:
                 tag_names.append(tagname)
     return tag_names
+
+
+def to_str(s):
+    """
+    Convert to str
+    :param s: something
+    :return: str
+    """
+    if six.PY2 and isinstance(s, unicode):
+        s = unicode_to_str_python2(s)
+    elif not isinstance(s, str):
+        s = str(s)
+    return s
+
+
+def unicode_to_str_python2(u):
+    """
+    In Python 2.x, convert unicode to str
+    :param u: unicode
+    :return: str
+    """
+    if six.PY2 and isinstance(u, unicode):
+        u = u.encode(sys.getfilesystemencoding())
+    return u
+
+
+def str_to_unicode_python2(s):
+    """
+    In Python 2.x, convert str to unicode
+    :param s: str
+    :return: unicode
+    """
+    if six.PY2 and isinstance(s, str):
+        s = s.decode(sys.getfilesystemencoding())
+    return s

@@ -1,6 +1,6 @@
 import re
-import util
-import util_talbes
+import deepcrf.util
+import deepcrf.util_talbes
 
 
 def load_file(filename):
@@ -8,7 +8,7 @@ def load_file(filename):
     tags = []
     with open(filename) as f:
         for l in f:
-            tag = l.decode('utf-8').strip()
+            tag = deepcrf.util.str_to_unicode_python2(l).strip()
             if tag == u'':
                 # sentence split
                 alltags_list.append(tags)
@@ -49,9 +49,9 @@ def run(gold_file, predicted_file, **args):
     gold_tags = replace_S_E_tags(gold_tags)
     predicted_tags = replace_S_E_tags(predicted_tags)
     gold_predict_pairs = [gold_tags, predicted_tags]
-    result, phrase_info = util.conll_eval(gold_predict_pairs, flag=False, tag_class=tag_names)
+    result, phrase_info = deepcrf.util.conll_eval(gold_predict_pairs, flag=False, tag_class=tag_names)
 
-    table = util_talbes.SimpleTable()
+    table = deepcrf.util_talbes.SimpleTable()
     table.set_header(('Tag Name', 'Precision', 'Recall', 'F_measure'))
 
     all_result = result['All_Result']
@@ -64,5 +64,5 @@ def run(gold_file, predicted_file, **args):
 
     table.print_table()
 
-    # accuracy = util.eval_accuracy(gold_predict_pairs, flag=False)
+    # accuracy = deepcrf.util.eval_accuracy(gold_predict_pairs, flag=False)
     # print('Tag Accuracy: {}'.format(accuracy))
