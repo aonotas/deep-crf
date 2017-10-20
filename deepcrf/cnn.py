@@ -30,13 +30,9 @@ class BaseCNNEncoder(chainer.Chain):
         hidden_dim = hidden_dim + add_dim
         self.add_dim = add_dim
         self.hidden_dim = hidden_dim
-        super(BaseCNNEncoder, self).__init__(
-            emb=L.EmbedID(vocab_size, emb_dim, ignore_label=-1),
-            conv=L.Convolution2D(1, hidden_dim,
-                                 ksize=(window_size, dim),
-                                 stride=(1, dim),
-                                 pad=(window_size // 2, 0))
-        )
+        super(BaseCNNEncoder, self).__init__(emb=L.EmbedID(vocab_size, emb_dim, ignore_label=-1),
+                                             conv=L.Convolution2D(1, hidden_dim, ksize=(window_size, dim),
+                                                                  stride=(1, dim), pad=(window_size // 2, 0)))
         self.spliter = spliter
         self.char_level_flag = True if self.spliter is None else False
         self.word_level_flag = not self.char_level_flag
