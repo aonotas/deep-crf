@@ -1,8 +1,8 @@
 import click
 import logging
 
-import main
-import evaluate
+import deepcrf.main
+import deepcrf.evaluate
 
 
 @click.group()

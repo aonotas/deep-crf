@@ -15,16 +15,16 @@ import chainer.links as L
 import math
 from chainer import initializers
 
-from cnn import CharCNNEncoder
-import util
-from util import PADDING, UNKWORD
+from .cnn import CharCNNEncoder
+import deepcrf.util
+from .util import PADDING, UNKWORD
 
-import six
+import six.moves
 
 to_cpu = chainer.cuda.to_cpu
 
 version = chainer.__version__
-from util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
+from .util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
 
 
 class BiLSTM_CNN_CRF(chainer.Chain):
