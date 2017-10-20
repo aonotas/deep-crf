@@ -8,12 +8,13 @@ from chainer import Variable, optimizers, serializers
 import chainer.functions as F
 import chainer.links as L
 import numpy as np
+import six.moves
 
 
-from util import UNKWORD, PADDING, BOS
+from .util import UNKWORD, PADDING, BOS
 
 
-from util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
+from .util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
 
 
 class BaseCNNEncoder(chainer.Chain):
@@ -28,13 +29,9 @@ class BaseCNNEncoder(chainer.Chain):
         hidden_dim = hidden_dim + add_dim
         self.add_dim = add_dim
         self.hidden_dim = hidden_dim
-        super(BaseCNNEncoder, self).__init__(
-            emb=L.EmbedID(vocab_size, emb_dim, ignore_label=-1),
-            conv=L.Convolution2D(1, hidden_dim,
-                                 ksize=(window_size, dim),
-                                 stride=(1, dim),
-                                 pad=(window_size / 2, 0))
-        )
+        super(BaseCNNEncoder, self).__init__(emb=L.EmbedID(vocab_size, emb_dim, ignore_label=-1),
+                                             conv=L.Convolution2D(1, hidden_dim, ksize=(window_size, dim),
+                                                                  stride=(1, dim), pad=(window_size // 2, 0)))
         self.spliter = spliter
         self.char_level_flag = True if self.spliter is None else False
         self.word_level_flag = not self.char_level_flag
@@ -62,8 +59,8 @@ class BaseCNNEncoder(chainer.Chain):
         separator = None
         """
 
-        padding_size = self.window_size / 2
-        padding = [self.PAD_IDX] * padding_size
+        padding_size = self.window_size // 2
+        padding = [self.PAD_IDX for i in six.moves.range(padding_size)]
         padding = self.xp.array(padding, dtype=self.xp.int32)
         data_num = len(data)
         ids = []
