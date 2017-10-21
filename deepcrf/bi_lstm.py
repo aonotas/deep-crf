@@ -72,7 +72,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
             self.add_link('char_cnn', char_cnn)
 
         if self.n_add_feature:
-            for i in six.moves.range(self.n_add_feature):
+            for i in six.moves.xrange(self.n_add_feature):
                 n_add_vocab = n_vocab_add[i]
                 add_embed = L.EmbedID(n_add_vocab, n_add_feature_dim, ignore_label=-1)
                 self.add_link('add_embed_' + str(i), add_embed)
@@ -181,7 +181,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
                 x = F.concat([x, x_char], axis=1)
 
             if x_additional:
-                for add_i in six.moves.range(self.n_add_feature):
+                for add_i in six.moves.xrange(self.n_add_feature):
                     x_add = x_additional[add_i][i]
                     x_add = my_variable(x_add, volatile=not self.train)
                     add_emb_layer = self.get_layer('add_embed_' + str(add_i))
