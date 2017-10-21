@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 to_cpu = chainer.cuda.to_cpu
 
 import os.path
-import six.moves
+import six
 
 version = chainer.__version__
 
@@ -40,7 +40,7 @@ def my_cudnn(cudnn_flag):
 
 
 def run(data_file, is_train=False, **args):
-    for k in args.keys():
+    for k in six.iterkeys(args):
         args[k] = deepcrf.util.str_to_unicode_python2(args[k])
 
     is_test = not is_train
@@ -168,7 +168,7 @@ def run(data_file, is_train=False, **args):
         elif word_emb_vocab_type == 'additional':
             word_vecs, vocab_glove = deepcrf.util.load_glove_embedding_include_vocab(emb_file)
             additional_vecs = []
-            for word, word_idx in sorted(vocab_glove.items(), key=lambda x: x[1]):
+            for word, word_idx in sorted(six.iteritems(vocab_glove), key=lambda x: x[1]):
                 if word not in vocab:
                     vocab[word] = len(vocab)
                     additional_vecs.append(word_vecs[word_idx])
@@ -182,7 +182,7 @@ def run(data_file, is_train=False, **args):
         vocab_char_file = args['vocab_char_file']
         vocab_char = deepcrf.util.load_vocab(vocab_char_file)
 
-    vocab_tags_inv = dict((v, k) for k, v in vocab_tags.items())
+    vocab_tags_inv = dict((v, k) for k, v in six.iteritems(vocab_tags))
     PAD_IDX = vocab[PADDING]
     UNK_IDX = vocab[UNKWORD]
 
@@ -220,7 +220,7 @@ def run(data_file, is_train=False, **args):
     y_dev_cpu = [[w[-1] for w in sentence]
                  for sentence in sentences_dev]
     # tag_names = []
-    tag_names = list(set([tag[2:] if len(tag) >= 2 else tag[0] for tag in vocab_tags.keys()]))
+    tag_names = list(set([tag[2:] if len(tag) >= 2 else tag[0] for tag in six.iterkeys(vocab_tags)]))
 
     x_test = parse_to_word_ids(sentences_test, word_input_idx, vocab)
     x_char_test = parse_to_char_ids(sentences_test)
@@ -371,7 +371,7 @@ def run(data_file, is_train=False, **args):
         # model_filename = args['model_filename']
         # model_filename = os.path.join(save_dir, model_filename)
         # serializers.load_hdf5(model_filename, net)
-        vocab_tags_inv = dict([(v, k) for k, v in vocab_tags.items()])
+        vocab_tags_inv = dict([(v, k) for k, v in six.iteritems(vocab_tags)])
         x_predict = x_train
         x_char_predict = x_char_train
         x_additionals = x_train_additionals

@@ -1,4 +1,7 @@
 import re
+
+import six
+
 import deepcrf.util
 import deepcrf.util_talbes
 
@@ -57,7 +60,7 @@ def run(gold_file, predicted_file, **args):
     all_result = result['All_Result']
     table.add_row(['All_Result'] + all_result)
 
-    for key in result.keys():
+    for key in six.iterkeys(result):
         if key != 'All_Result':
             r = result[key]
             table.add_row([key] + r)
