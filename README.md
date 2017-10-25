@@ -24,6 +24,7 @@ pip install 'chainer==1.24.0'
 
 # if you want to use Chainer v2.1.0
 pip install 'chainer==2.1.0'
+pip install cupy # if you use GPU
 ```
 
 ## How to train?
