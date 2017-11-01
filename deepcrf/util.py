@@ -80,7 +80,7 @@ def read_conll_file(filename, delimiter=u'\t', input_idx=0, output_idx=-1):
     sentence = []
     sentences = []
     n_features = -1
-    with open(filename, 'r') as f:
+    with open(filename) as f:
         for line_idx, l in enumerate(f):
             l_split = str_to_unicode_python2(l).strip().split(delimiter)
             l_split = [_.strip() for _ in l_split]
