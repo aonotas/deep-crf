@@ -35,6 +35,7 @@ def replace_S_E_tags(tag_lists):
         tag = re.sub(r'^S-', "B-", tag)
         tag = re.sub(r'^E-', "I-", tag)
         return tag
+
     return [[rep_func(tag) for tag in tags] for tags in tag_lists]
 
 
