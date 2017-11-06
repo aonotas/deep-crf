@@ -129,7 +129,6 @@ def run(data_file, is_train=False, **args):
         vocab = deepcrf.util.build_vocab(sentences_words_train)
         vocab_char = deepcrf.util.build_vocab(deepcrf.util.flatten(sentences_words_train))
         vocab_tags = deepcrf.util.build_tag_vocab(sentences_train)
-
     elif is_test:
         vocab = deepcrf.util.load_vocab(save_vocab)
         vocab_char = deepcrf.util.load_vocab(save_vocab_char)
@@ -164,7 +163,6 @@ def run(data_file, is_train=False, **args):
         elif word_emb_vocab_type == 'replace_only':
             word_ids, word_vecs = deepcrf.util.load_glove_embedding(emb_file, vocab)
             assert_no_emb(word_vecs)
-
         elif word_emb_vocab_type == 'additional':
             word_vecs, vocab_glove = deepcrf.util.load_glove_embedding_include_vocab(emb_file)
             additional_vecs = []
@@ -292,7 +290,6 @@ def run(data_file, is_train=False, **args):
     my_cudnn(args['use_cudnn'])
 
     if args.get('word_emb_file', False):
-
         if word_emb_vocab_type == 'replace_all':
             # replace all vocab by Pre-trained embeddings
             assert_word_emb_shape(word_vecs.shape[1], net.word_embed.W.shape[1])
@@ -301,7 +298,6 @@ def run(data_file, is_train=False, **args):
             assert_no_emb(word_vecs)
             assert_word_emb_shape(word_vecs.shape[1], net.word_embed.W.shape[1])
             net.word_embed.W.data[word_ids] = word_vecs[:]
-
         elif word_emb_vocab_type == 'additional':
             assert_word_emb_shape(word_vecs.shape[1], net.word_embed.W.shape[1])
             v_size = additional_vecs.shape[0]
@@ -407,7 +403,6 @@ def run(data_file, is_train=False, **args):
     prev_dev_accuracy = 0.0
     prev_dev_f = 0.0
     for epoch in six.moves.range(args['max_iter']):
-
         # train
         net.set_train(train=True)
         iteration_list = range(0, len(x_train), batchsize)

@@ -18,7 +18,6 @@ from .util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
 
 
 class BaseCNNEncoder(chainer.Chain):
-
     def __init__(self, emb_dim=100, window_size=3, init_emb=None,
                  hidden_dim=100, vocab_size=0, splitter=u' ', add_dim=0,
                  PAD_IDX=None):
@@ -75,7 +74,6 @@ class BaseCNNEncoder(chainer.Chain):
                 # Char-level (don't lowercase)
                 ids.append(words)
                 i_char += len(words)
-
             else:
                 # Word-level
                 ids.append(words)
@@ -99,7 +97,7 @@ class BaseCNNEncoder(chainer.Chain):
     def compute_vecs(self, word_ids, word_boundaries, phrase_num,
                      char_vecs=None):
         word_ids = my_variable(word_ids, volatile=not self.train)
-        word_embs = self.emb(word_ids)     # total_len x dim
+        word_embs = self.emb(word_ids)  # total_len x dim
         word_embs_reshape = F.reshape(word_embs, (1, 1, -1, self.emb_dim))
 
         if self.word_level_flag and char_vecs is not None:
@@ -135,7 +133,6 @@ class BaseCNNEncoder(chainer.Chain):
 
 
 class CharCNNEncoder(BaseCNNEncoder):
-
     def __init__(self, emb_dim=100, window_size=3, init_emb=None,
                  hidden_dim=100, vocab_size=0, PAD_IDX=None):
         """
@@ -148,7 +145,6 @@ class CharCNNEncoder(BaseCNNEncoder):
 
 
 class WordCNNEncoder(BaseCNNEncoder):
-
     def __init__(self, emb_dim=100, window_size=3, init_emb=None,
                  hidden_dim=100, add_dim=0, vocab_size=0,
                  PAD_IDX=None):
