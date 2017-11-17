@@ -52,10 +52,14 @@ def run(data_file, is_train=False, **args):
     save_dir = args['save_dir']
     print(args)
 
-    if args.get('use_list_files', False):
-        data_files = [filename.strip() for filename in open(data_file)]
-    else:
-        data_files = [data_file]
+    def convert_multi_files(data_file):
+        if args.get('use_list_files', False):
+            data_files = [filename.strip() for filename in open(data_file)]
+        else:
+            data_files = [data_file]
+        return data_files
+
+    data_files = convert_multi_files(data_file)
 
     # TODO: check save_dir exist
     if not os.path.isdir(save_dir):
@@ -111,8 +115,11 @@ def run(data_file, is_train=False, **args):
     sentences_dev = []
     sentences_test = []
     if dev_file:
+
+        dev_file = convert_multi_files(dev_file)
         sentences_dev = deepcrf.util.read_conll_file(dev_file, delimiter=delimiter)
     if test_file:
+        test_file = convert_multi_files(test_file)
         sentences_test = deepcrf.util.read_conll_file(test_file, delimiter=delimiter)
 
     # Additional setup
