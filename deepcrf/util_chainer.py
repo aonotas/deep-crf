@@ -37,3 +37,19 @@ def my_rnn_link(rnn_link, n_layers, feature_dim, hidden_dim, use_dropout, use_cu
         # v2.0
         return rnn_link(n_layers=n_layers, in_size=feature_dim,
                         out_size=hidden_dim, dropout=use_dropout)
+
+
+def my_cuda_get_device(cuda, device_id):
+    if version < '2.0':
+        cuda.get_device(device_id).use()
+    else:
+        # v2.0
+        cuda.get_device_from_id(device_id).use()
+
+
+def my_cleargrads(net):
+    if version < '2.0':
+        net.zerograds()
+    else:
+        # v2.0
+        net.cleargrads()
