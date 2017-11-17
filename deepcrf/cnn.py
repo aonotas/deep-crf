@@ -60,7 +60,7 @@ class BaseCNNEncoder(chainer.Chain):
         """
 
         padding_size = self.window_size // 2
-        padding = [self.PAD_IDX for i in six.moves.range(padding_size)]
+        padding = [self.PAD_IDX for i in six.moves.xrange(padding_size)]
         padding = self.xp.array(padding, dtype=self.xp.int32)
         data_num = len(data)
         ids = []

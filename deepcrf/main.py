@@ -402,7 +402,7 @@ def run(data_file, is_train=False, **args):
     t = 0.0
     prev_dev_accuracy = 0.0
     prev_dev_f = 0.0
-    for epoch in six.moves.range(args['max_iter']):
+    for epoch in six.moves.xrange(args['max_iter']):
         # train
         net.set_train(train=True)
         iteration_list = range(0, len(x_train), batchsize)
