@@ -225,11 +225,13 @@ def conll_eval(gold_predict_pairs, flag=True, tag_class=None):
 
     for tag_name in tag_class:
         if cnt_phrases_dict[tag_name]['gold_cnt']:
-            recall = cnt_phrases_dict[tag_name]['correct_cnt'] / float(cnt_phrases_dict[tag_name]['gold_cnt'])
+            recall = cnt_phrases_dict[tag_name]['correct_cnt'] / \
+                float(cnt_phrases_dict[tag_name]['gold_cnt'])
         else:
             recall = 0.0
         if cnt_phrases_dict[tag_name]['predict_cnt']:
-            precision = cnt_phrases_dict[tag_name]['correct_cnt'] / float(cnt_phrases_dict[tag_name]['predict_cnt'])
+            precision = cnt_phrases_dict[tag_name]['correct_cnt'] / \
+                float(cnt_phrases_dict[tag_name]['predict_cnt'])
         else:
             precision = 0.0
         sum_recall_precision = 1.0 if recall + precision == 0.0 else recall + precision
@@ -360,7 +362,7 @@ def unicode_to_str_python2(u):
     :return: str
     """
     if six.PY2 and isinstance(u, unicode):
-        u = u.encode(sys.getfilesystemencoding())
+        u = u.encode('utf-8')
     return u
 
 
@@ -371,5 +373,5 @@ def str_to_unicode_python2(s):
     :return: unicode
     """
     if six.PY2 and isinstance(s, str):
-        s = s.decode(sys.getfilesystemencoding())
+        s = s.decode('utf-8')
     return s
