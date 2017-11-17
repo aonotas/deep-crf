@@ -63,6 +63,18 @@ This format is called CoNLL format.
 $ deep-crf train input_file.txt --delimiter=' ' --n_layer 3  --dev_file input_file_dev.txt --save_dir save_model_dir --save_name bilstm-cnn-crf_adam --optimizer adam
 ```
 
+### Deep BiLSTM-CNN-CRF model (three layers) with Multiple Input files
+If input file is multiple due to large input files or many lines, please following commands.
+```
+$ deep-crf train input_file_list.txt --delimiter=' ' --n_layer 3  --dev_file input_file_dev.txt --save_dir save_model_dir --save_name bilstm-cnn-crf_adam --optimizer adam --use_list_files 1
+```
+```
+$ cat input_file_list.txt
+./path_to_file/input_file_1.txt
+./path_to_file/input_file_2.txt
+./path_to_file/input_file_3.txt
+```
+
 ### set Pretrained Word Embeddings 
 ```
 $ deep-crf train input_file.txt --delimiter=' ' --n_layer 3 --word_emb_file ./glove.6B.100d.txt --word_emb_vocab_type replace_all --dev_file input_file_dev.txt
