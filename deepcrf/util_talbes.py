@@ -1,4 +1,6 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 from six.moves import zip_longest
 
 

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import re
 import deepcrf.util
 import deepcrf.util_talbes
