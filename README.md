@@ -65,6 +65,7 @@ $ deep-crf train input_file.txt --delimiter=' ' --n_layer 3  --dev_file input_fi
 
 ### Deep BiLSTM-CNN-CRF model (three layers) with Multiple Input files
 If input file is multiple due to large input files or many lines, please following commands.
+Please add this arg : `--use_list_files 1` 
 ```
 $ deep-crf train input_file_list.txt --delimiter=' ' --n_layer 3  --dev_file input_file_dev.txt --save_dir save_model_dir --save_name bilstm-cnn-crf_adam --optimizer adam --use_list_files 1
 ```
