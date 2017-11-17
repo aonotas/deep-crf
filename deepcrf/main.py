@@ -220,7 +220,8 @@ def run(data_file, is_train=False, **args):
     y_dev_cpu = [[w[-1] for w in sentence]
                  for sentence in sentences_dev]
     # tag_names = []
-    tag_names = list(set([tag[2:] if len(tag) >= 2 else tag[0] for tag in six.iterkeys(vocab_tags)]))
+    tag_names = list(set([tag[2:] if len(tag) >= 2 else tag[0]
+                          for tag in six.iterkeys(vocab_tags)]))
 
     x_test = parse_to_word_ids(sentences_test, word_input_idx, vocab)
     x_char_test = parse_to_char_ids(sentences_test)
@@ -400,12 +401,15 @@ def run(data_file, is_train=False, **args):
 
         return False
 
+    logging.info('start training...')
     tmax = args['max_iter']
     t = 0.0
     prev_dev_accuracy = 0.0
     prev_dev_f = 0.0
     for epoch in six.moves.xrange(args['max_iter']):
         # train
+        logging.info('epoch:' + str(epoch))
+        logging.info(' [train]')
         net.set_train(train=True)
         iteration_list = range(0, len(x_train), batchsize)
         perm = np.random.permutation(len(x_train))
@@ -442,8 +446,6 @@ def run(data_file, is_train=False, **args):
         # Evaluation
         train_accuracy = deepcrf.util.eval_accuracy(predict_train)
 
-        logging.info('epoch:' + str(epoch))
-        logging.info(' [train]')
         logging.info('  loss     :' + str(sum_loss))
         logging.info('  accuracy :' + str(train_accuracy))
 
@@ -452,7 +454,8 @@ def run(data_file, is_train=False, **args):
             x_dev, x_char_dev, y_dev, x_dev_additionals)
 
         gold_predict_pairs = [y_dev_cpu, predict_dev_tags]
-        result, phrase_info = deepcrf.util.conll_eval(gold_predict_pairs, flag=False, tag_class=tag_names)
+        result, phrase_info = deepcrf.util.conll_eval(
+            gold_predict_pairs, flag=False, tag_class=tag_names)
         all_result = result['All_Result']
 
         # Evaluation
