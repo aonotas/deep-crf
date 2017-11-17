@@ -79,31 +79,32 @@ def read_raw_file(filename, delimiter=u' '):
     return sentences
 
 
-def read_conll_file(filename, delimiter=u'\t', input_idx=0, output_idx=-1):
+def read_conll_file(filenames, delimiter=u'\t', input_idx=0, output_idx=-1):
     sentence = []
     sentences = []
     n_features = -1
-    with open(filename) as f:
-        for line_idx, l in enumerate(f):
-            l_split = str_to_unicode_python2(l).strip().split(delimiter)
-            l_split = [_.strip() for _ in l_split]
-            if len(l_split) <= 1:
-                if len(sentence) > 0:
-                    sentences.append(sentence)
-                    sentence = []
-                continue
-            else:
-                if n_features == -1:
-                    n_features = len(l_split)
+    for filename in filenames:
+        with open(filename) as f:
+            for line_idx, l in enumerate(f):
+                l_split = str_to_unicode_python2(l).strip().split(delimiter)
+                l_split = [_.strip() for _ in l_split]
+                if len(l_split) <= 1:
+                    if len(sentence) > 0:
+                        sentences.append(sentence)
+                        sentence = []
+                    continue
+                else:
+                    if n_features == -1:
+                        n_features = len(l_split)
 
-                if n_features != len(l_split):
-                    val = (str(len(l_split)), str(len(line_idx)))
-                    err_msg = 'Invalid input feature sizes: "%s". \
-                    Please check at line [%s]' % val
-                    raise ValueError(err_msg)
-                sentence.append(l_split)
-    if len(sentence) > 0:
-        sentences.append(sentence)
+                    if n_features != len(l_split):
+                        val = (str(len(l_split)), str(len(line_idx)))
+                        err_msg = 'Invalid input feature sizes: "%s". \
+                        Please check at line [%s]' % val
+                        raise ValueError(err_msg)
+                    sentence.append(l_split)
+        if len(sentence) > 0:
+            sentences.append(sentence)
     return sentences
 
 

@@ -52,6 +52,11 @@ def run(data_file, is_train=False, **args):
     save_dir = args['save_dir']
     print(args)
 
+    if args.get('use_list_files', False):
+        data_files = [filename.strip() for filename in open(data_file)]
+    else:
+        data_files = [data_file]
+
     # TODO: check save_dir exist
     if not os.path.isdir(save_dir):
         err_msg = 'There is no dir : {}\n'.format(save_dir)
@@ -86,7 +91,7 @@ def run(data_file, is_train=False, **args):
     additional_input_idx = input_idx[1:]
     sentences_train = []
     if is_train:
-        sentences_train = deepcrf.util.read_conll_file(filename=data_file, delimiter=delimiter)
+        sentences_train = deepcrf.util.read_conll_file(filenames=data_files, delimiter=delimiter)
         if len(sentences_train) == 0:
             s = str(len(sentences_train))
             err_msg = 'Invalid training sizes: {} sentences. '.format(s)
@@ -95,10 +100,11 @@ def run(data_file, is_train=False, **args):
         # Predict
         if len(input_idx) == 1:
             # raw text format
-            sentences_train = deepcrf.util.read_raw_file(filename=data_file, delimiter=u' ')
+            sentences_train = deepcrf.util.read_raw_file(filenames=data_files, delimiter=u' ')
         else:
             # conll format
-            sentences_train = deepcrf.util.read_conll_file(filename=data_file, delimiter=delimiter)
+            sentences_train = deepcrf.util.read_conll_file(
+                filenames=data_files, delimiter=delimiter)
 
     # sentences_train = sentences_train[:100]
 
