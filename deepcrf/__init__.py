@@ -1,8 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import click
 import logging
 
-import main
-import evaluate
+import deepcrf.main
+import deepcrf.evaluate
 
 
 @click.group()
@@ -45,7 +48,7 @@ def cli():
               help="select from [replace_all, replace_only, additional]")
 @click.option('--vocab_file', type=click.Path())
 @click.option('--vocab_char_file', type=click.Path())
-@click.option('--dev_file', type=click.Path())
+@click.option('--dev_file', type=click.Path(), help='development file to use early stopping')
 @click.option('--test_file', type=click.Path())
 @click.option('--model_filename', type=click.Path())
 @click.option('--input_idx', type=str, default='0', help='input_idx for features.')
@@ -54,7 +57,8 @@ def cli():
               help='delimiter string')
 @click.option('--save_name', type=str, default='bilstm-cnn-crf_adam', help='save_name')
 @click.option('--use_cudnn', type=int, default=1, help='use_cudnn = 0 or 1')
-@click.option('--efficient_gpu', type=int, default=1, help='efficient_gpu (if efficient_gpu == 1, it needs small GPU memory)')
+@click.option('--efficient_gpu', type=int, default=1,
+              help='efficient_gpu (if efficient_gpu == 1, it needs small GPU memory)')
 def train(train_file, **args):
     # load input_file
     main.run(train_file, is_train=True, **args)
@@ -92,7 +96,7 @@ def train(train_file, **args):
 @click.option('--word_emb_file', type=click.Path())
 @click.option('--word_emb_vocab_type', type=str, default='replace_all',
               help="select from [replace_all, replace_only, additional]")
-@click.option('--dev_file', type=click.Path())
+@click.option('--dev_file', type=click.Path(), help='development file to use early stopping')
 @click.option('--test_file', type=click.Path())
 @click.option('--vocab_file', type=click.Path())
 @click.option('--vocab_char_file', type=click.Path())
@@ -105,7 +109,8 @@ def train(train_file, **args):
 @click.option('--input_idx', type=str, default='0', help='input_idx for features.')
 @click.option('--output_idx', type=str, default='-1', help='output_idx for predicting.')
 @click.option('--use_cudnn', type=int, default=1, help='use_cudnn = 0 or 1')
-@click.option('--efficient_gpu', type=int, default=1, help='efficient_gpu (if efficient_gpu == 1, it needs small GPU memory)')
+@click.option('--efficient_gpu', type=int, default=1,
+              help='efficient_gpu (if efficient_gpu == 1, it needs small GPU memory)')
 def predict(input_file, **args):
     main.run(input_file, is_train=False, **args)
 

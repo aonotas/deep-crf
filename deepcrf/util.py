@@ -1,9 +1,14 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import os
 import sys
 import re
 import numpy as np
 
 from itertools import chain
+
+import six
 
 pattern_num = re.compile(r'[0-9]')
 CHAR_PADDING = u"_"
@@ -29,7 +34,7 @@ def build_vocab(dataset, min_count=0):
         for w in d:
             vocab_cnt[w] = vocab_cnt.get(w, 0) + 1
 
-    for w, cnt in sorted(vocab_cnt.items(), key=lambda x: x[1], reverse=True):
+    for w, cnt in sorted(six.iteritems(vocab_cnt), key=lambda x: x[1], reverse=True):
         if cnt >= min_count:
             vocab[w] = len(vocab)
 
@@ -47,28 +52,30 @@ def build_tag_vocab(dataset, tag_idx=-1):
 
 
 def write_vocab(filename, vocab):
-    f = open(filename, 'w')
-    for w, idx in sorted(vocab.items(), key=lambda x: x[1]):
-        line = '\t'.join([w.encode('utf-8'), str(idx)])
-        f.write(line + '\n')
+    with open(filename, 'w') as f:
+        for e in sorted([[unicode_to_str_python2(w), to_str(i)] for w, i in six.iteritems(vocab)], key=lambda x: x[1]):
+            line = '\t'.join(e)
+            f.write(line + '\n')
 
 
 def load_vocab(filename):
     vocab = {}
-    for l in open(filename):
-        w, idx = l.decode('utf-8').strip().split(u'\t')
-        vocab[w] = int(idx)
+    with open(filename) as f:
+        for l in f:
+            w, idx = str_to_unicode_python2(l).strip().split(u'\t')
+            vocab[w] = int(idx)
     return vocab
 
 
 def read_raw_file(filename, delimiter=u' '):
     sentences = []
-    for l in open(filename):
-        words = l.decode('utf-8').strip().split(delimiter)
-        words = [w.strip() for w in words if len(w.strip()) != 0]
-        if len(words) and len(words[0]):
-            words = [(w, -1) for w in words]
-            sentences.append(words)
+    with open(filename) as f:
+        for l in f:
+            words = str_to_unicode_python2(l).strip().split(delimiter)
+            words = [w.strip() for w in words if len(w.strip()) != 0]
+            if len(words) and len(words[0]):
+                words = [(w, -1) for w in words]
+                sentences.append(words)
     return sentences
 
 
@@ -76,24 +83,25 @@ def read_conll_file(filename, delimiter=u'\t', input_idx=0, output_idx=-1):
     sentence = []
     sentences = []
     n_features = -1
-    for line_idx, l in enumerate(open(filename, 'r')):
-        l_split = l.strip().decode('utf-8').split(delimiter)
-        l_split = [_.strip() for _ in l_split]
-        if len(l_split) <= 1:
-            if len(sentence) > 0:
-                sentences.append(sentence)
-                sentence = []
-            continue
-        else:
-            if n_features == -1:
-                n_features = len(l_split)
+    with open(filename) as f:
+        for line_idx, l in enumerate(f):
+            l_split = str_to_unicode_python2(l).strip().split(delimiter)
+            l_split = [_.strip() for _ in l_split]
+            if len(l_split) <= 1:
+                if len(sentence) > 0:
+                    sentences.append(sentence)
+                    sentence = []
+                continue
+            else:
+                if n_features == -1:
+                    n_features = len(l_split)
 
-            if n_features != len(l_split):
-                val = (str(len(l_split)), str(len(line_idx)))
-                err_msg = 'Invalid input feature sizes: "%s". \
-                Please check at line [%s]' % val
-                raise ValueError(err_msg)
-            sentence.append(l_split)
+                if n_features != len(l_split):
+                    val = (str(len(l_split)), str(len(line_idx)))
+                    err_msg = 'Invalid input feature sizes: "%s". \
+                    Please check at line [%s]' % val
+                    raise ValueError(err_msg)
+                sentence.append(l_split)
     if len(sentence) > 0:
         sentences.append(sentence)
     return sentences
@@ -102,15 +110,16 @@ def read_conll_file(filename, delimiter=u'\t', input_idx=0, output_idx=-1):
 def load_glove_embedding(filename, vocab):
     word_ids = []
     word_vecs = []
-    for i, l in enumerate(open(filename)):
-        l = l.decode('utf-8').split(u' ')
-        word = l[0].lower()
+    with open(filename) as f:
+        for i, l in enumerate(f):
+            l = str_to_unicode_python2(l).split(u' ')
+            word = l[0].lower()
 
-        if word in vocab:
-            word_ids.append(vocab.get(word))
-            vec = l[1:]
-            vec = map(float, vec)
-            word_vecs.append(vec)
+            if word in vocab:
+                word_ids.append(vocab.get(word))
+                vec = l[1:]
+                vec = list(map(float, vec))
+                word_vecs.append(vec)
     word_ids = np.array(word_ids, dtype=np.int32)
     word_vecs = np.array(word_vecs, dtype=np.float32)
     return word_ids, word_vecs
@@ -122,14 +131,15 @@ def load_glove_embedding_include_vocab(filename):
     vocab[PADDING] = len(vocab)
     vocab[UNKWORD] = len(vocab)
 
-    for i, l in enumerate(open(filename)):
-        l = l.decode('utf-8').split(u' ')
-        word = l[0].lower()
-        if word not in vocab:
-            vocab[word] = len(vocab)
-            vec = l[1:]
-            vec = map(float, vec)
-            word_vecs.append(vec)
+    with open(filename) as f:
+        for i, l in enumerate(f):
+            l = str_to_unicode_python2(l).split(u' ')
+            word = l[0].lower()
+            if word not in vocab:
+                vocab[word] = len(vocab)
+                vec = l[1:]
+                vec = list(map(float, vec))
+                word_vecs.append(vec)
 
     # PADDING, UNKWORD
     word_vecs.insert(0, np.random.random((len(vec),)))
@@ -137,6 +147,7 @@ def load_glove_embedding_include_vocab(filename):
 
     word_vecs = np.array(word_vecs, dtype=np.float32)
     return word_vecs, vocab
+
 
 # Conll 03 shared task evaluation code (IOB format only)
 
@@ -182,7 +193,7 @@ def conll_eval(gold_predict_pairs, flag=True, tag_class=None):
         cnt_phrases_dict[tag_name]['gold_cnt'] = 0
         cnt_phrases_dict[tag_name]['correct_cnt'] = 0
 
-    for i in xrange(len(gold_tags)):
+    for i in six.moves.xrange(len(gold_tags)):
         gold = gold_tags[i]
         predict = predict_tags[i]
 
@@ -208,22 +219,26 @@ def conll_eval(gold_predict_pairs, flag=True, tag_class=None):
 
     lst_gold_phrase = n_phrases_dict['gold']
     lst_predict_phrase = n_phrases_dict['predict']
-    num_gold_phrase = sum(n_phrases_dict['gold'].values())
-    num_predict_phrase = sum(n_phrases_dict['predict'].values())
+    num_gold_phrase = sum(six.itervalues(n_phrases_dict['gold']))
+    num_predict_phrase = sum(six.itervalues(n_phrases_dict['predict']))
     phrase_info = [num_gold_phrase, num_predict_phrase, lst_gold_phrase, lst_predict_phrase]
 
     for tag_name in tag_class:
-        recall = cnt_phrases_dict[tag_name][
-            'correct_cnt'] / float(cnt_phrases_dict[tag_name]['gold_cnt']) if cnt_phrases_dict[tag_name]['gold_cnt'] else 0.0
-        precision = cnt_phrases_dict[tag_name]['correct_cnt'] / float(
-            cnt_phrases_dict[tag_name]['predict_cnt']) if cnt_phrases_dict[tag_name]['predict_cnt'] else 0.0
+        if cnt_phrases_dict[tag_name]['gold_cnt']:
+            recall = cnt_phrases_dict[tag_name]['correct_cnt'] / float(cnt_phrases_dict[tag_name]['gold_cnt'])
+        else:
+            recall = 0.0
+        if cnt_phrases_dict[tag_name]['predict_cnt']:
+            precision = cnt_phrases_dict[tag_name]['correct_cnt'] / float(cnt_phrases_dict[tag_name]['predict_cnt'])
+        else:
+            precision = 0.0
         sum_recall_precision = 1.0 if recall + precision == 0.0 else recall + precision
         f_measure = (2 * recall * precision) / (sum_recall_precision)
         evals[tag_name] = [precision * 100.0, recall * 100.0, f_measure * 100.0]
 
-    correct_cnt = sum([ev['correct_cnt'] for tag_name, ev in cnt_phrases_dict.items()])
-    gold_cnt = sum([ev['gold_cnt'] for tag_name, ev in cnt_phrases_dict.items()])
-    predict_cnt = sum([ev['predict_cnt'] for tag_name, ev in cnt_phrases_dict.items()])
+    correct_cnt = sum([ev['correct_cnt'] for tag_name, ev in six.iteritems(cnt_phrases_dict)])
+    gold_cnt = sum([ev['gold_cnt'] for tag_name, ev in six.iteritems(cnt_phrases_dict)])
+    predict_cnt = sum([ev['predict_cnt'] for tag_name, ev in six.iteritems(cnt_phrases_dict)])
 
     recall = correct_cnt / float(gold_cnt) if gold_cnt else 0.0
     precision = correct_cnt / float(predict_cnt) if predict_cnt else 0.0
@@ -237,8 +252,8 @@ def IOB_to_range_format_one(tag_list, is_test_mode=False):
     sentence_lst = []
     ner = []
     ner_type = []
-    # print tag_list
-    for i in xrange(len(tag_list)):
+    # print(tag_list)
+    for i in six.moves.xrange(len(tag_list)):
         prev_tag = tag_list[i - 1] if i != 0 else ''
         prev_tag_type = prev_tag[2:]
         # prev_tag_head = tag_list[i-1][0] if i != 0 else ''
@@ -323,3 +338,38 @@ def uniq_tagset(alltags_list, tag_names=[]):
             if tagname != u'' and tagname not in tag_names:
                 tag_names.append(tagname)
     return tag_names
+
+
+def to_str(s):
+    """
+    Convert to str
+    :param s: something
+    :return: str
+    """
+    if six.PY2 and isinstance(s, unicode):
+        s = unicode_to_str_python2(s)
+    elif not isinstance(s, str):
+        s = str(s)
+    return s
+
+
+def unicode_to_str_python2(u):
+    """
+    In Python 2.x, convert unicode to str
+    :param u: unicode
+    :return: str
+    """
+    if six.PY2 and isinstance(u, unicode):
+        u = u.encode(sys.getfilesystemencoding())
+    return u
+
+
+def str_to_unicode_python2(s):
+    """
+    In Python 2.x, convert str to unicode
+    :param s: str
+    :return: unicode
+    """
+    if six.PY2 and isinstance(s, str):
+        s = s.decode(sys.getfilesystemencoding())
+    return s

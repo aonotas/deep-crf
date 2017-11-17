@@ -1,4 +1,6 @@
-# setup.py
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from setuptools import setup, find_packages
 
 setup(
@@ -8,6 +10,7 @@ setup(
     include_package_data=False,
     install_requires=[
         'Click',
+        'h5py'
     ],
     entry_points='''
         [console_scripts]

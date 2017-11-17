@@ -15,20 +15,19 @@ import chainer.links as L
 import math
 from chainer import initializers
 
-from cnn import CharCNNEncoder
-import util
-from util import PADDING, UNKWORD
+from .cnn import CharCNNEncoder
+import deepcrf.util
+from .util import PADDING, UNKWORD
 
-import six
+import six.moves
 
 to_cpu = chainer.cuda.to_cpu
 
 version = chainer.__version__
-from util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
+from .util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
 
 
 class BiLSTM_CNN_CRF(chainer.Chain):
-
     def __init__(self, n_vocab=None, n_char_vocab=None, emb_dim=100,
                  hidden_dim=200, init_emb=None, use_dropout=0.33, n_layers=1,
                  n_label=0, use_crf=True, use_bi=True, char_input_dim=100,
@@ -49,7 +48,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
         rnn_links = [L.NStepBiLSTM, L.NStepLSTM, L.NStepBiGRU, L.NStepGRU,
                      L.NStepBiRNNTanh, L.NStepRNNTanh]
         if rnn_name not in rnn_names:
-            candidate = ','.join(rnn_list)
+            candidate = ','.join(rnn_names)
             raise ValueError('Invalid RNN name: "%s". Please select from [%s]'
                              % (rnn_name, candidate))
 
@@ -64,7 +63,6 @@ class BiLSTM_CNN_CRF(chainer.Chain):
             self.word_embed.W.data[:] = init_emb[:]
 
         if use_char:
-
             char_cnn = CharCNNEncoder(emb_dim=char_input_dim, window_size=3,
                                       hidden_dim=char_hidden_dim,
                                       vocab_size=n_char_vocab, init_emb=None,
@@ -72,7 +70,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
             self.add_link('char_cnn', char_cnn)
 
         if self.n_add_feature:
-            for i in six.moves.range(self.n_add_feature):
+            for i in six.moves.xrange(self.n_add_feature):
                 n_add_vocab = n_vocab_add[i]
                 add_embed = L.EmbedID(n_add_vocab, n_add_feature_dim, ignore_label=-1)
                 self.add_link('add_embed_' + str(i), add_embed)
@@ -113,7 +111,6 @@ class BiLSTM_CNN_CRF(chainer.Chain):
         my_set_train(train)
 
     def predict(self, y_list, t, compute_loss=True):
-
         predict_list = []
         cnt = 0
         for n_len in self.n_length:
@@ -181,7 +178,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
                 x = F.concat([x, x_char], axis=1)
 
             if x_additional:
-                for add_i in six.moves.range(self.n_add_feature):
+                for add_i in six.moves.xrange(self.n_add_feature):
                     x_add = x_additional[add_i][i]
                     x_add = my_variable(x_add, volatile=not self.train)
                     add_emb_layer = self.get_layer('add_embed_' + str(add_i))
@@ -191,7 +188,7 @@ class BiLSTM_CNN_CRF(chainer.Chain):
             x = my_dropout(x, ratio=self.use_dropout, train=self.train)
             xs.append(x)
 
-        _hy_f, _cy_f, h_vecs = self.rnn(hx=hx, cx=cx, xs=xs,)
+        _hy_f, _cy_f, h_vecs = self.rnn(hx=hx, cx=cx, xs=xs, )
 
         h_vecs = F.concat(h_vecs, axis=0)
         if self.use_dropout:

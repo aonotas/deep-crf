@@ -3,30 +3,38 @@
 # DeepCRF: Neural Networks and CRFs for Sequence Labeling
 A implementation of Conditional Random Fields (CRFs) with Deep Learning Method.
 
-DeepCRF is a sequene labeling library that uses neural networks and CRFs in Python using Chainer, a flexible deep learning framework.
+DeepCRF is a sequence labeling library that uses neural networks and CRFs in Python using Chainer, a flexible deep learning framework.
+
+## Which version of Python is supported?
+* Python 2.7
+* Python 3.4 or later
+
+## Which version of Chainer is supported?
+* Chainer v1.24.0
+* Chainer v2.1.0
 
 ## How to install?
 ```
 git clone https://github.com/aonotas/deep-crf.git
 cd deep-crf
 python setup.py install
-```
 
-Now support both Chainer v2.1.0 and v1.24.0!
-```
-# if you want to use v2
-pip install 'chainer==2.1.0'
-
-# if you want to use v1
+# if you want to use Chainer v1.24.0
 pip install 'chainer==1.24.0'
+
+# if you want to use Chainer v2.1.0
+pip install 'chainer==2.1.0'
+pip install cupy # if you want to use CUDA
 ```
 
 ## How to train?
 ### train [Ma and Hovy (2016)](https://arxiv.org/abs/1603.01354) model
 ```
-$ mkdir save_model_dir
-$ deep-crf train input_file.txt --dev_file input_file_dev.txt --save_name bilstm-cnn-crf_adam --optimizer adam
+$ deep-crf train input_file.txt --delimiter=' ' --dev_file input_file_dev.txt --save_dir save_model_dir --save_name bilstm-cnn-crf_adam --optimizer adam
 ```
+
+Note that `--dev_file` means path of development file to use early stopping.
+
 ```
 $ cat input_file.txt
 Barack  B−PERSON 
@@ -52,12 +60,12 @@ This format is called CoNLL format.
 
 ### Deep BiLSTM-CNN-CRF model (three layers)
 ```
-$ deep-crf train input_file.txt --n_layer 3  --dev_file input_file_dev.txt --save_name bilstm-cnn-crf_adam --optimizer adam
+$ deep-crf train input_file.txt --delimiter=' ' --n_layer 3  --dev_file input_file_dev.txt --save_dir save_model_dir --save_name bilstm-cnn-crf_adam --optimizer adam
 ```
 
 ### set Pretrained Word Embeddings 
 ```
-$ deep-crf train input_file.txt --n_layer 3 --word_emb_file ./glove.6B.100d.txt --word_emb_vocab_type replace_all --dev_file input_file_dev.txt
+$ deep-crf train input_file.txt --delimiter=' ' --n_layer 3 --word_emb_file ./glove.6B.100d.txt --word_emb_vocab_type replace_all --dev_file input_file_dev.txt
 ```
 
 We prepare some vocab mode.
@@ -80,7 +88,7 @@ in 0.085703 -0.22201 0.16569 0.13373 0.38239
 
 ### Additional Feature Support
 ```
-$ deep-crf train input_file_multi.txt --input_idx 0,1 --output_idx 2 --dev_file input_file_dev.txt --save_name bilstm-cnn-crf_adam_additional --optimizer adam
+$ deep-crf train input_file_multi.txt --delimiter=' ' --input_idx 0,1 --output_idx 2 --dev_file input_file_dev.txt --save_dir save_model_dir --save_name bilstm-cnn-crf_adam_additional --optimizer adam
 ```
 
 ```
@@ -111,7 +119,7 @@ $ deep-crf train input_file_multi.txt --delimiter ' ' --model_name bilstm-cnn-cr
 
 ## How to predict? 
 ```
-$ deep-crf predict input_raw_file.txt --model_filename ./save_model_dir/bilstm-cnn-crf_adam_epoch3.model --save_name bilstm-cnn-crf_adam  --predicted_output predicted.txt
+$ deep-crf predict input_raw_file.txt --delimiter=' ' --model_filename ./save_model_dir/bilstm-cnn-crf_adam_epoch3.model --save_dir save_model_dir --save_name bilstm-cnn-crf_adam  --predicted_output predicted.txt
 ```
 
 Please use following format when `predict`.
@@ -128,7 +136,7 @@ Please set same `--save_name` in training step.
 
 ## How to predict? (Additional Feature)
 ```
-$ deep-crf predict input_file_multi.txt --input_idx 0,1 --output_idx 2 --model_filename ./save_model_dir/bilstm-cnn-crf_multi_epoch3.model --save_name bilstm-cnn-crf_multi  --predicted_output predicted.txt
+$ deep-crf predict input_file_multi.txt --delimiter=' ' --input_idx 0,1 --output_idx 2 --model_filename ./save_model_dir/bilstm-cnn-crf_multi_epoch3.model --save_dir save_model_dir --save_name bilstm-cnn-crf_multi  --predicted_output predicted.txt
 ```
 Note that you must prepare CoNLL format input file when you use additional feature mode in training step.
 ```
@@ -198,7 +206,7 @@ DeepCRF provides following features.
 ### POS Tagging
 Model                                                                      | Accuracy 
 -------------------------------------------------------------------------- | :---: 
-CRFsuit                                                                    | 96.39
+CRFsuite                                                                    | 96.39
 deep-crf                                                                   | 97.45
 [dos Santos and Zadrozny (2014)](http://proceedings.mlr.press/v32/santos14.pdf) | 97.32
 [Ma and Hovy (2016)](https://arxiv.org/abs/1603.01354)                     | 97.55  
@@ -207,7 +215,7 @@ deep-crf                                                                   | 97.
 ### Named Entity Recognition (NER)
 Model                                                                           | Prec. | Recall | F1
 ------------------------------------------------------------------------------- | :---: | :---:  | :---: 
-CRFsuit                                                                         | 84.43 | 83.60  | 84.01
+CRFsuite                                                                         | 84.43 | 83.60  | 84.01
 deep-crf                                                                        | 90.82 | 91.11  | 90.96
 [Ma and Hovy (2016)](https://arxiv.org/abs/1603.01354)                          | 91.35 | 91.06  | 91.21
 
@@ -215,7 +223,7 @@ deep-crf                                                                        
 ### Chunking
 Model                                                                           | Prec. | Recall | F1
 ------------------------------------------------------------------------------- | :---: | :---:  | :---: 
-CRFsuit                                                                         | 93.77 | 93.45  | 93.61
+CRFsuite                                                                         | 93.77 | 93.45  | 93.61
 deep-crf                                                                        | 94.67 | 94.43  | 94.55
 [Huang et al. (2015)](https://arxiv.org/abs/1508.01991)                         |   -   |   -    | 94.46
 

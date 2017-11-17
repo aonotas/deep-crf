@@ -8,18 +8,18 @@ from chainer import Variable, optimizers, serializers
 import chainer.functions as F
 import chainer.links as L
 import numpy as np
+import six.moves
 
 
-from util import UNKWORD, PADDING, BOS
+from .util import UNKWORD, PADDING, BOS
 
 
-from util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
+from .util_chainer import my_variable, my_dropout, my_set_train, my_rnn_link
 
 
 class BaseCNNEncoder(chainer.Chain):
-
     def __init__(self, emb_dim=100, window_size=3, init_emb=None,
-                 hidden_dim=100, vocab_size=0, spliter=u' ', add_dim=0,
+                 hidden_dim=100, vocab_size=0, splitter=u' ', add_dim=0,
                  PAD_IDX=None):
         """
         Neural network tagger by dos (Santos and Zadrozny, ICML 2014).
@@ -29,15 +29,11 @@ class BaseCNNEncoder(chainer.Chain):
         hidden_dim = hidden_dim + add_dim
         self.add_dim = add_dim
         self.hidden_dim = hidden_dim
-        super(BaseCNNEncoder, self).__init__(
-            emb=L.EmbedID(vocab_size, emb_dim, ignore_label=-1),
-            conv=L.Convolution2D(1, hidden_dim,
-                                 ksize=(window_size, dim),
-                                 stride=(1, dim),
-                                 pad=(window_size / 2, 0))
-        )
-        self.spliter = spliter
-        self.char_level_flag = True if self.spliter is None else False
+        super(BaseCNNEncoder, self).__init__(emb=L.EmbedID(vocab_size, emb_dim, ignore_label=-1),
+                                             conv=L.Convolution2D(1, hidden_dim, ksize=(window_size, dim),
+                                                                  stride=(1, dim), pad=(window_size // 2, 0)))
+        self.splitter = splitter
+        self.char_level_flag = True if self.splitter is None else False
         self.word_level_flag = not self.char_level_flag
         self.emb_dim = emb_dim
         self.window_size = window_size
@@ -63,8 +59,8 @@ class BaseCNNEncoder(chainer.Chain):
         separator = None
         """
 
-        padding_size = self.window_size / 2
-        padding = [self.PAD_IDX] * padding_size
+        padding_size = self.window_size // 2
+        padding = [self.PAD_IDX for i in six.moves.xrange(padding_size)]
         padding = self.xp.array(padding, dtype=self.xp.int32)
         data_num = len(data)
         ids = []
@@ -75,10 +71,9 @@ class BaseCNNEncoder(chainer.Chain):
 
         for words in data:
             if self.char_level_flag:
-                # Char-level (dont lowecase)
+                # Char-level (don't lowercase)
                 ids.append(words)
                 i_char += len(words)
-
             else:
                 # Word-level
                 ids.append(words)
@@ -102,14 +97,14 @@ class BaseCNNEncoder(chainer.Chain):
     def compute_vecs(self, word_ids, word_boundaries, phrase_num,
                      char_vecs=None):
         word_ids = my_variable(word_ids, volatile=not self.train)
-        word_embs = self.emb(word_ids)     # total_len x dim
+        word_embs = self.emb(word_ids)  # total_len x dim
         word_embs_reshape = F.reshape(word_embs, (1, 1, -1, self.emb_dim))
 
         if self.word_level_flag and char_vecs is not None:
-            # print char_vecs.data.shape
-            # print word_embs.data.shape
+            # print(char_vecs.data.shape)
+            # print(word_embs.data.shape)
             word_embs = F.concat([word_embs, char_vecs], axis=1)
-            # print word_embs.data.shape
+            # print(word_embs.data.shape)
             dim = self.emb_dim + self.add_dim
             word_embs_reshape = F.reshape(word_embs, (1, 1, -1, dim))
 
@@ -123,8 +118,8 @@ class BaseCNNEncoder(chainer.Chain):
         word_emb_conv_reshape = F.split_axis(word_emb_conv_reshape,
                                              word_boundaries, axis=1)
 
-        embs = [F.max(word_emb_conv_word, axis=1) for i, word_emb_conv_word in
-                enumerate(word_emb_conv_reshape) if i % 2 == 1]
+        embs = [F.max(word_emb_conv_word, axis=1)
+                for i, word_emb_conv_word in enumerate(word_emb_conv_reshape) if i % 2 == 1]
         embs = F.concat(embs, axis=0)
         phrase_emb_conv = F.reshape(embs,
                                     (phrase_num, self.hidden_dim))
@@ -138,7 +133,6 @@ class BaseCNNEncoder(chainer.Chain):
 
 
 class CharCNNEncoder(BaseCNNEncoder):
-
     def __init__(self, emb_dim=100, window_size=3, init_emb=None,
                  hidden_dim=100, vocab_size=0, PAD_IDX=None):
         """
@@ -146,12 +140,11 @@ class CharCNNEncoder(BaseCNNEncoder):
         """
         super(CharCNNEncoder, self).__init__(
             emb_dim=emb_dim, window_size=window_size, init_emb=init_emb,
-            hidden_dim=hidden_dim, spliter=None, vocab_size=vocab_size,
+            hidden_dim=hidden_dim, splitter=None, vocab_size=vocab_size,
             PAD_IDX=PAD_IDX)
 
 
 class WordCNNEncoder(BaseCNNEncoder):
-
     def __init__(self, emb_dim=100, window_size=3, init_emb=None,
                  hidden_dim=100, add_dim=0, vocab_size=0,
                  PAD_IDX=None):
@@ -160,5 +153,5 @@ class WordCNNEncoder(BaseCNNEncoder):
         """
         super(WordCNNEncoder, self).__init__(
             emb_dim=emb_dim, window_size=window_size, init_emb=init_emb,
-            hidden_dim=hidden_dim, spliter=u' ', add_dim=add_dim,
+            hidden_dim=hidden_dim, splitter=u' ', add_dim=add_dim,
             vocab_size=vocab_size, PAD_IDX=PAD_IDX)
