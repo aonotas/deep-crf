@@ -34,7 +34,7 @@ def build_vocab(dataset, min_count=0):
         for w in d:
             vocab_cnt[w] = vocab_cnt.get(w, 0) + 1
 
-    for w, cnt in sorted(vocab_cnt.items(), key=lambda x: x[1], reverse=True):
+    for w, cnt in sorted(six.iteritems(vocab_cnt), key=lambda x: x[1], reverse=True):
         if cnt >= min_count:
             vocab[w] = len(vocab)
 
@@ -53,7 +53,7 @@ def build_tag_vocab(dataset, tag_idx=-1):
 
 def write_vocab(filename, vocab):
     with open(filename, 'w') as f:
-        for e in sorted([[unicode_to_str_python2(w), to_str(i)] for w, i in vocab.items()], key=lambda x: x[1]):
+        for e in sorted([[unicode_to_str_python2(w), to_str(i)] for w, i in six.iteritems(vocab)], key=lambda x: x[1]):
             line = '\t'.join(e)
             f.write(line + '\n')
 
@@ -219,8 +219,8 @@ def conll_eval(gold_predict_pairs, flag=True, tag_class=None):
 
     lst_gold_phrase = n_phrases_dict['gold']
     lst_predict_phrase = n_phrases_dict['predict']
-    num_gold_phrase = sum(n_phrases_dict['gold'].values())
-    num_predict_phrase = sum(n_phrases_dict['predict'].values())
+    num_gold_phrase = sum(six.itervalues(n_phrases_dict['gold']))
+    num_predict_phrase = sum(six.itervalues(n_phrases_dict['predict']))
     phrase_info = [num_gold_phrase, num_predict_phrase, lst_gold_phrase, lst_predict_phrase]
 
     for tag_name in tag_class:
@@ -236,9 +236,9 @@ def conll_eval(gold_predict_pairs, flag=True, tag_class=None):
         f_measure = (2 * recall * precision) / (sum_recall_precision)
         evals[tag_name] = [precision * 100.0, recall * 100.0, f_measure * 100.0]
 
-    correct_cnt = sum([ev['correct_cnt'] for tag_name, ev in cnt_phrases_dict.items()])
-    gold_cnt = sum([ev['gold_cnt'] for tag_name, ev in cnt_phrases_dict.items()])
-    predict_cnt = sum([ev['predict_cnt'] for tag_name, ev in cnt_phrases_dict.items()])
+    correct_cnt = sum([ev['correct_cnt'] for tag_name, ev in six.iteritems(cnt_phrases_dict)])
+    gold_cnt = sum([ev['gold_cnt'] for tag_name, ev in six.iteritems(cnt_phrases_dict)])
+    predict_cnt = sum([ev['predict_cnt'] for tag_name, ev in six.iteritems(cnt_phrases_dict)])
 
     recall = correct_cnt / float(gold_cnt) if gold_cnt else 0.0
     precision = correct_cnt / float(predict_cnt) if predict_cnt else 0.0
