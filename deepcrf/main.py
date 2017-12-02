@@ -104,7 +104,7 @@ def run(data_file, is_train=False, **args):
         # Predict
         if len(input_idx) == 1:
             # raw text format
-            sentences_train = deepcrf.util.read_raw_file(filename=data_files, delimiter=u' ')
+            sentences_train = deepcrf.util.read_raw_file(filenames=data_files, delimiter=u' ')
         else:
             # conll format
             sentences_train = deepcrf.util.read_conll_file(

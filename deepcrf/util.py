@@ -67,15 +67,16 @@ def load_vocab(filename):
     return vocab
 
 
-def read_raw_file(filename, delimiter=u' '):
+def read_raw_file(filenames, delimiter=u' '):
     sentences = []
-    with open(filename) as f:
-        for l in f:
-            words = str_to_unicode_python2(l).strip().split(delimiter)
-            words = [w.strip() for w in words if len(w.strip()) != 0]
-            if len(words) and len(words[0]):
-                words = [(w, -1) for w in words]
-                sentences.append(words)
+    for filename in filenames:
+        with open(filename) as f:
+            for l in f:
+                words = str_to_unicode_python2(l).strip().split(delimiter)
+                words = [w.strip() for w in words if len(w.strip()) != 0]
+                if len(words) and len(words[0]):
+                    words = [(w, -1) for w in words]
+                    sentences.append(words)
     return sentences
 
 
