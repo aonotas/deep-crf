@@ -99,7 +99,7 @@ def read_conll_file(filenames, delimiter=u'\t', input_idx=0, output_idx=-1):
                         n_features = len(l_split)
 
                     if n_features != len(l_split):
-                        val = (str(len(l_split)), str(len(line_idx)))
+                        val = (str(len(l_split)), str(line_idx))
                         err_msg = 'Invalid input feature sizes: "%s". \
                         Please check at line [%s]' % val
                         raise ValueError(err_msg)
