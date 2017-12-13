@@ -62,7 +62,9 @@ def load_vocab(filename):
     vocab = {}
     with open(filename) as f:
         for l in f:
-            w, idx = str_to_unicode_python2(l).strip().split(u'\t')
+            lst = str_to_unicode_python2(l).strip().split(u'\t')
+            w = lst[0]
+            idx = lst[-1]
             vocab[w] = int(idx)
     return vocab
 
