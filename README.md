@@ -15,6 +15,9 @@ DeepCRF is a sequence labeling library that uses neural networks and CRFs in Pyt
 
 ## How to install?
 ```
+# if you use Ubuntu
+sudo apt install libhdf5-dev
+
 git clone https://github.com/aonotas/deep-crf.git
 cd deep-crf
 python setup.py install
