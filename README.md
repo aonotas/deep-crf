@@ -7,7 +7,7 @@ DeepCRF is a sequence labeling library that uses neural networks and CRFs in Pyt
 
 ## Which version of Python is supported?
 * Python 2.7
-* Python 3.4 or later
+* Python 3.4
 
 ## Which version of Chainer is supported?
 * Chainer v1.24.0
