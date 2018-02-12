@@ -480,7 +480,7 @@ def run(data_file, is_train=False, **args):
 
         dev_f = all_result[-1]
 
-        if prev_dev_f <= dev_f:
+        if prev_dev_f < dev_f:
             logging.info(' [update best model on dev set!]')
             dev_list = [prev_dev_f, dev_f]
             dev_str = '       ' + ' => '.join(map(str, dev_list))
