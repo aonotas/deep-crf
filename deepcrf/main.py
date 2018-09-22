@@ -54,7 +54,8 @@ def run(data_file, is_train=False, **args):
 
     def convert_multi_files(data_file):
         if args.get('use_list_files', False):
-            data_files = [filename.strip() for filename in open(data_file)]
+            with open(data_file) as f:
+                data_files = [filename.strip() for filename in f]
         else:
             data_files = [data_file]
         return data_files
